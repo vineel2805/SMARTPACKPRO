@@ -6,7 +6,12 @@ import { useAuth } from '../../context/AuthContext';
 import { CheckCircle2, AlertCircle, Plus, User } from 'lucide-react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
-import { getTodayPackingItems } from '../../services/firestoreService';
+import {
+  getTodayPackingItems,
+  recordStudentSeen,
+  recordStudentProgress,
+  recordStudentCompleted,
+} from '../../services/firestoreService';
 import type { StudentChecklistItem } from '../../types/models';
 
 export function TodaysBag() {
@@ -26,6 +31,9 @@ export function TodaysBag() {
       }
 
       try {
+        // Record that student has opened the app
+        await recordStudentSeen(user.id, user.name, user.class);
+
         const dailyItems = await getTodayPackingItems(user.class);
         setItems(
           dailyItems.map(item => ({
@@ -33,7 +41,8 @@ export function TodaysBag() {
             checked: false,
           })),
         );
-      } catch {
+      } catch (error) {
+        console.error(error);
         toast.error('Unable to load today\'s bag from database');
       } finally {
         setIsLoading(false);
@@ -46,7 +55,7 @@ export function TodaysBag() {
     }
 
     loadTodayItems();
-  }, [user?.class]);
+  }, [user?.class, user?.id, user?.name]);
 
   const bringItems = items.filter(item => item.type === 'bring');
   const doNotBringItems = items.filter(item => item.type === 'do-not-bring');
@@ -56,8 +65,17 @@ export function TodaysBag() {
 
   const handleCheck = (id: string) => {
     setItems(prev =>
-      prev.map(item => (item.id === id ? { ...item, checked: !item.checked } : item))
+      prev.map(item => (item.id === id ? { ...item, checked: !item.checked } : item)),
     );
+
+    // Record progress when item is checked
+    if (user?.id && user?.name && user?.class) {
+      const updatedBringItems = items
+        .map(item => (item.id === id ? { ...item, checked: !item.checked } : item))
+        .filter(item => item.type === 'bring');
+      const markedCount = updatedBringItems.filter(item => item.checked).length + customItems.filter(item => item.checked).length;
+      recordStudentProgress(user.id, user.name, user.class, markedCount).catch(console.error);
+    }
   };
 
   const handleCustomCheck = (id: string) => {
@@ -66,6 +84,12 @@ export function TodaysBag() {
     );
     setCustomItems(updated);
     localStorage.setItem('customItems', JSON.stringify(updated));
+
+    // Record progress when custom item is checked
+    if (user?.id && user?.name && user?.class) {
+      const markedCount = items.filter(item => item.checked).length + updated.filter(item => item.checked).length;
+      recordStudentProgress(user.id, user.name, user.class, markedCount).catch(console.error);
+    }
   };
 
   const handleAddCustomItem = () => {
@@ -87,8 +111,12 @@ export function TodaysBag() {
     toast.success('Item added to your list');
   };
 
-  const handleDonePacking = () => {
+  const handleDonePacking = async () => {
     if (progress === 100) {
+      // Record completion
+      if (user?.id && user?.name && user?.class) {
+        await recordStudentCompleted(user.id, user.name, user.class);
+      }
       toast.success('Great job! Your bag is ready! 🎒', {
         description: 'Have a wonderful day at school!',
       });

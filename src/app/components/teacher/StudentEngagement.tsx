@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getStudentEngagementByClass } from '../../services/firestoreService';
 import type { StudentEngagement as StudentEngagementItem } from '../../types/models';
 
-type StatusFilter = 'all' | 'completed' | 'in-progress' | 'not-seen' | 'inactive';
+type StatusFilter = 'all' | 'completed' | 'in-progress' | 'seen' | 'not-seen' | 'inactive';
 
 export function StudentEngagement() {
   const { user } = useAuth();
@@ -45,6 +45,7 @@ export function StudentEngagement() {
       bg: 'bg-green-500/10',
       border: 'border-green-500/20',
       label: 'Completed',
+      description: 'Finished packing',
     },
     'in-progress': {
       icon: Clock,
@@ -52,13 +53,23 @@ export function StudentEngagement() {
       bg: 'bg-yellow-500/10',
       border: 'border-yellow-500/20',
       label: 'In Progress',
+      description: 'Currently packing',
+    },
+    seen: {
+      icon: Eye,
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+      border: 'border-blue-500/20',
+      label: 'Seen',
+      description: 'Opened app',
     },
     'not-seen': {
-      icon: Eye,
+      icon: AlertCircle,
       color: 'text-zinc-400',
       bg: 'bg-zinc-800',
       border: 'border-zinc-700',
       label: 'Not Seen',
+      description: 'Hasn\'t opened app',
     },
     inactive: {
       icon: AlertCircle,
@@ -66,6 +77,7 @@ export function StudentEngagement() {
       bg: 'bg-red-500/10',
       border: 'border-red-500/20',
       label: 'Inactive',
+      description: 'No recent activity',
     },
   };
 
@@ -78,6 +90,7 @@ export function StudentEngagement() {
     () => ({
       completed: students.filter(s => s.status === 'completed').length,
       'in-progress': students.filter(s => s.status === 'in-progress').length,
+      seen: students.filter(s => s.status === 'seen').length,
       'not-seen': students.filter(s => s.status === 'not-seen').length,
       inactive: students.filter(s => s.status === 'inactive').length,
     }),
@@ -86,6 +99,12 @@ export function StudentEngagement() {
 
   const handleRemindStudents = () => {
     const count = students.filter(s => s.status === 'not-seen' || s.status === 'inactive').length;
+    if (count === 0) {
+      toast.success('All students are engaged!', {
+        description: 'No reminders needed',
+      });
+      return;
+    }
     toast.success(`Reminder sent to ${count} students`, {
       description: 'Students will be notified to check their packing list',
     });
@@ -211,6 +230,7 @@ export function StudentEngagement() {
                     <span className={config.color}>{config.label}</span>
                   </div>
                 </div>
+                <p className="text-xs text-zinc-400 mb-2">{config.description}</p>
                 {student.lastSeen && (
                   <p className="text-xs text-zinc-500">Last seen: {student.lastSeen}</p>
                 )}

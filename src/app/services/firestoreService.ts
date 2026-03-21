@@ -752,6 +752,67 @@ export async function getStudentEngagementByClasses(classNames: string[]): Promi
   return all.flat();
 }
 
+export async function recordStudentSeen(studentId: string, studentName: string, className: string) {
+  const engagementId = `${className}_${studentId}`;
+  try {
+    await setDoc(
+      doc(db, 'studentEngagement', engagementId),
+      {
+        studentId,
+        name: studentName,
+        class: className,
+        status: 'seen',
+        lastSeen: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  } catch (error) {
+    console.error('Failed to record student seen status:', error);
+  }
+}
+
+export async function recordStudentProgress(studentId: string, studentName: string, className: string, itemsMarked: number) {
+  const engagementId = `${className}_${studentId}`;
+  try {
+    await setDoc(
+      doc(db, 'studentEngagement', engagementId),
+      {
+        studentId,
+        name: studentName,
+        class: className,
+        status: itemsMarked > 0 ? 'in-progress' : 'seen',
+        itemsMarked,
+        lastUpdated: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  } catch (error) {
+    console.error('Failed to record student progress:', error);
+  }
+}
+
+export async function recordStudentCompleted(studentId: string, studentName: string, className: string) {
+  const engagementId = `${className}_${studentId}`;
+  try {
+    await setDoc(
+      doc(db, 'studentEngagement', engagementId),
+      {
+        studentId,
+        name: studentName,
+        class: className,
+        status: 'completed',
+        completedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  } catch (error) {
+    console.error('Failed to record student completion:', error);
+  }
+}
+
 export function getQuickSuggestions() {
   return quickSuggestions;
 }
