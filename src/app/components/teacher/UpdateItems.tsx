@@ -96,7 +96,7 @@ export function UpdateItems() {
         items,
         teacherId: user.id,
         teacherName: user.name,
-        teacherRoleType: isClassTeacher ? 'class-teacher' : 'subject-teacher',
+        teacherRoleType: scope === 'general' ? 'class-teacher' : 'subject-teacher',
         teacherSubject: teacherSubject || undefined,
       });
 
@@ -108,8 +108,9 @@ export function UpdateItems() {
       });
 
       setItems([]);
-    } catch {
-      toast.error('Failed to save items to database');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save items to database';
+      toast.error(message);
     } finally {
       setIsSaving(false);
     }

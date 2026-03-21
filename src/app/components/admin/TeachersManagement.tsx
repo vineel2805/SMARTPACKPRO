@@ -1,29 +1,73 @@
 import { useEffect, useState } from 'react';
-import { Users, School, Plus, MoreVertical, Award } from 'lucide-react';
+import { Users, School, Plus, Award } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
-import { getTeachers } from '../../services/firestoreService';
+import { getTeachers, updateTeacherAssignments } from '../../services/firestoreService';
 import type { AppUser } from '../../types/models';
 
 export function TeachersManagement() {
   const [teachers, setTeachers] = useState<AppUser[]>([]);
+  const [savingTeacherId, setSavingTeacherId] = useState<string | null>(null);
+
+  async function loadTeachers() {
+    try {
+      const data = await getTeachers();
+      setTeachers(data);
+    } catch {
+      toast.error('Failed to load teachers from database');
+    }
+  }
 
   useEffect(() => {
-    async function loadTeachers() {
-      try {
-        const data = await getTeachers();
-        setTeachers(data);
-      } catch {
-        toast.error('Failed to load teachers from database');
-      }
-    }
-
     loadTeachers();
   }, []);
 
   const handleAddTeacher = () => {
     toast.info('Add teacher functionality would open a form here');
+  };
+
+  const handleEditAssignments = async (teacher: AppUser) => {
+    const existingAssignedClasses = (teacher.assignedClasses ?? []).join(', ');
+    const assignedClassesInput = window.prompt(
+      `Assigned classes for ${teacher.name} (comma separated):`,
+      existingAssignedClasses,
+    );
+
+    if (assignedClassesInput === null) return;
+
+    const assignedClasses = assignedClassesInput
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+
+    const classTeacherOfInput = window.prompt(
+      `Class teacher of (optional, leave empty if not class teacher):`,
+      teacher.classTeacherOf ?? '',
+    );
+
+    if (classTeacherOfInput === null) return;
+
+    const classTeacherOf = classTeacherOfInput.trim();
+    const isClassTeacher = classTeacherOf.length > 0;
+
+    setSavingTeacherId(teacher.id);
+    try {
+      await updateTeacherAssignments({
+        teacherId: teacher.id,
+        assignedClasses,
+        isClassTeacher,
+        classTeacherOf: classTeacherOf || undefined,
+      });
+
+      toast.success('Teacher assignments updated');
+      await loadTeachers();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update teacher assignments';
+      toast.error(message);
+    } finally {
+      setSavingTeacherId(null);
+    }
   };
 
   return (
@@ -113,8 +157,14 @@ export function TeachersManagement() {
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <Button variant="ghost" size="icon" className="rounded-lg">
-                          <MoreVertical className="w-4 h-4" />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-zinc-700"
+                          onClick={() => handleEditAssignments(teacher)}
+                          disabled={savingTeacherId === teacher.id}
+                        >
+                          {savingTeacherId === teacher.id ? 'Saving...' : 'Edit'}
                         </Button>
                       </td>
                     </tr>

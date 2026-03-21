@@ -173,6 +173,29 @@ function normalizeItemName(name: string) {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function normalizeSubject(subject?: string) {
+  return String(subject ?? '').trim().toLowerCase();
+}
+
+const subjectKeywordMap: Record<string, string[]> = {
+  mathematics: ['math', 'maths', 'mathematics', 'algebra', 'geometry'],
+  science: ['science', 'lab', 'chemistry', 'physics', 'biology'],
+  english: ['english', 'grammar', 'literature', 'reading'],
+  'social studies': ['social', 'history', 'civics', 'geography'],
+  hindi: ['hindi'],
+};
+
+function hasCrossSubjectKeyword(itemName: string, teacherSubject?: string) {
+  const text = normalizeItemName(itemName);
+  const ownSubject = normalizeSubject(teacherSubject);
+
+  const ownKeywords = new Set(subjectKeywordMap[ownSubject] ?? []);
+
+  return Object.values(subjectKeywordMap)
+    .flat()
+    .some(keyword => !ownKeywords.has(keyword) && text.includes(keyword));
+}
+
 type TeacherUpdateRecord = {
   className: string;
   date: string;
@@ -281,6 +304,56 @@ export async function submitTeacherUpdates(params: {
     teacherSubject,
   } = params;
 
+  if (!classNames.length) {
+    throw new Error('At least one class is required');
+  }
+
+  if (!items.length) {
+    throw new Error('At least one item is required');
+  }
+
+  const teacherSnap = await getDoc(doc(db, 'users', teacherId));
+  if (!teacherSnap.exists()) {
+    throw new Error('Teacher account not found');
+  }
+
+  const teacherData = teacherSnap.data();
+  if (teacherData.role !== 'teacher') {
+    throw new Error('Only teachers can send updates');
+  }
+
+  const assignedClasses = Array.isArray(teacherData.assignedClasses) ? teacherData.assignedClasses : [];
+  const invalidClasses = classNames.filter(className => !assignedClasses.includes(className));
+  if (invalidClasses.length) {
+    throw new Error(`You are not assigned to: ${invalidClasses.join(', ')}`);
+  }
+
+  const isClassTeacher = Boolean(teacherData.isClassTeacher);
+  const subjectFromDb = String(teacherData.subject ?? '').trim();
+
+  if (teacherRoleType === 'class-teacher' && !isClassTeacher) {
+    throw new Error('Only class teachers can send general updates');
+  }
+
+  if (teacherRoleType === 'subject-teacher') {
+    if (!subjectFromDb) {
+      throw new Error('Subject not configured for this teacher');
+    }
+
+    const badSubjectItems = items.filter(
+      item => normalizeSubject(item.subject) !== normalizeSubject(subjectFromDb),
+    );
+
+    if (badSubjectItems.length) {
+      throw new Error('Subject teachers can only send updates for their own subject');
+    }
+
+    const crossSubjectItems = items.filter(item => hasCrossSubjectKeyword(item.name, subjectFromDb));
+    if (crossSubjectItems.length) {
+      throw new Error('Item list contains content that belongs to another subject');
+    }
+  }
+
   const date = todayKey();
 
   const classUpdateTasks = classNames.map(async className => {
@@ -312,6 +385,127 @@ export async function submitTeacherUpdates(params: {
   });
 
   await Promise.all(classUpdateTasks);
+}
+
+async function getClassDocBySchoolAndName(school: string, className: string) {
+  const q = query(collection(db, 'classes'), where('name', '==', className), limit(20));
+  const snapshot = await getDocs(q);
+
+  const match = snapshot.docs.find(item => String(item.data().school ?? '') === school) ?? snapshot.docs[0];
+  if (!match) return null;
+  return match;
+}
+
+export async function updateTeacherAssignments(params: {
+  teacherId: string;
+  assignedClasses: string[];
+  isClassTeacher: boolean;
+  classTeacherOf?: string;
+}) {
+  const { teacherId, assignedClasses, isClassTeacher, classTeacherOf } = params;
+
+  const teacherRef = doc(db, 'users', teacherId);
+  const teacherSnap = await getDoc(teacherRef);
+  if (!teacherSnap.exists()) {
+    throw new Error('Teacher not found');
+  }
+
+  const teacherData = teacherSnap.data();
+  if (teacherData.role !== 'teacher') {
+    throw new Error('Only teacher assignments can be changed here');
+  }
+
+  const schoolName = String(teacherData.school ?? '');
+  const previousClassTeacherOf = String(teacherData.classTeacherOf ?? '');
+
+  const normalizedAssignedClasses = Array.from(
+    new Set(
+      assignedClasses
+        .map(item => item.trim())
+        .filter(Boolean),
+    ),
+  );
+
+  const normalizedClassTeacherOf = String(classTeacherOf ?? '').trim();
+
+  if (isClassTeacher && !normalizedClassTeacherOf) {
+    throw new Error('Class teacher must have a class assigned');
+  }
+
+  if (normalizedClassTeacherOf && !normalizedAssignedClasses.includes(normalizedClassTeacherOf)) {
+    throw new Error('Class teacher class must be included in assigned classes');
+  }
+
+  if (normalizedClassTeacherOf) {
+    const existingClassTeacherQuery = query(
+      collection(db, 'users'),
+      where('role', '==', 'teacher'),
+      where('school', '==', schoolName),
+      where('classTeacherOf', '==', normalizedClassTeacherOf),
+    );
+    const existingClassTeacherSnapshot = await getDocs(existingClassTeacherQuery);
+
+    await Promise.all(
+      existingClassTeacherSnapshot.docs
+        .filter(item => item.id !== teacherId)
+        .map(item =>
+          setDoc(
+            doc(db, 'users', item.id),
+            {
+              isClassTeacher: false,
+              classTeacherOf: null,
+            },
+            { merge: true },
+          ),
+        ),
+    );
+  }
+
+  await setDoc(
+    teacherRef,
+    {
+      assignedClasses: normalizedAssignedClasses,
+      isClassTeacher,
+      classTeacherOf: normalizedClassTeacherOf || null,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+
+  if (previousClassTeacherOf && previousClassTeacherOf !== normalizedClassTeacherOf) {
+    const previousClassDoc = await getClassDocBySchoolAndName(schoolName, previousClassTeacherOf);
+    if (previousClassDoc) {
+      const previousClassData = previousClassDoc.data();
+      const classTeacher = previousClassData.classTeacher as { teacherId?: string } | undefined;
+      if (classTeacher?.teacherId === teacherId) {
+        await setDoc(
+          doc(db, 'classes', previousClassDoc.id),
+          {
+            classTeacher: null,
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+      }
+    }
+  }
+
+  if (normalizedClassTeacherOf) {
+    const nextClassDoc = await getClassDocBySchoolAndName(schoolName, normalizedClassTeacherOf);
+    if (nextClassDoc) {
+      await setDoc(
+        doc(db, 'classes', nextClassDoc.id),
+        {
+          classTeacher: {
+            teacherId,
+            teacherName: String(teacherData.name ?? ''),
+          },
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+    }
+  }
 }
 
 export async function getTodayPackingItems(className: string): Promise<PackingItem[]> {
