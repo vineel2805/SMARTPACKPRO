@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Users, School, Plus, Award } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '../ui/button';
+import { AddTeacherModal } from './AddTeacherModal';
 import { toast } from 'sonner';
 import { getClasses, getTeachers, updateTeacherAssignments } from '../../services/firestoreService';
 import type { AppUser } from '../../types/models';
@@ -13,6 +14,7 @@ export function TeachersManagement() {
   const [editingTeacherId, setEditingTeacherId] = useState<string | null>(null);
   const [editAssignedClasses, setEditAssignedClasses] = useState<string[]>([]);
   const [editClassTeacherOf, setEditClassTeacherOf] = useState('');
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
 
   async function loadTeachers() {
     try {
@@ -29,7 +31,11 @@ export function TeachersManagement() {
   }, []);
 
   const handleAddTeacher = () => {
-    toast.info('Add teacher functionality would open a form here');
+    setShowAddTeacherModal(true);
+  };
+
+  const handleTeacherCreated = async () => {
+    await loadTeachers();
   };
 
   const startEditingTeacher = (teacher: AppUser) => {
@@ -252,6 +258,25 @@ export function TeachersManagement() {
           </div>
         </main>
       </div>
+
+      {/* Add Teacher Modal */}
+      <AddTeacherModal
+        open={showAddTeacherModal}
+        onOpenChange={setShowAddTeacherModal}
+        onTeacherCreated={handleTeacherCreated}
+        subjects={[
+          'Mathematics',
+          'Science',
+          'English',
+          'Social Studies',
+          'Hindi',
+          'Physics',
+          'Chemistry',
+          'Biology',
+          'Computer Science',
+        ]}
+        classes={allClasses}
+      />
     </div>
   );
 }

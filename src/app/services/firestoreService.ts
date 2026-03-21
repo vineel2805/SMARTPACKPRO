@@ -856,3 +856,110 @@ export async function updateSchoolKeywordConfig(
     { merge: true },
   );
 }
+
+export async function createTeacher(params: {
+  name: string;
+  email: string;
+  password: string;
+  subject: string;
+  school: string;
+  assignedClasses: string[];
+  isClassTeacher: boolean;
+  classTeacherOf: string | null;
+}): Promise<string> {
+  const {
+    name,
+    email,
+    password,
+    subject,
+    school,
+    assignedClasses,
+    isClassTeacher,
+    classTeacherOf,
+  } = params;
+
+  // Validate input
+  if (!name.trim()) throw new Error('Teacher name is required');
+  if (!email.trim()) throw new Error('Email is required');
+  if (!email.includes('@')) throw new Error('Invalid email format');
+  if (!password.trim()) throw new Error('Password is required');
+  if (!subject) throw new Error('Subject is required');
+  if (!assignedClasses.length) throw new Error('At least one class must be assigned');
+
+  // Check if email already exists in this school
+  const existingQuery = query(
+    collection(db, 'users'),
+    where('school', '==', school),
+    where('email', '==', email.toLowerCase()),
+  );
+  const existingSnapshot = await getDocs(existingQuery);
+  if (!existingSnapshot.empty) {
+    throw new Error('Email already exists in this school');
+  }
+
+  // If making this teacher a class teacher, clear any existing class teacher for that class
+  if (isClassTeacher && classTeacherOf) {
+    const existingClassTeacherQuery = query(
+      collection(db, 'users'),
+      where('school', '==', school),
+      where('classTeacherOf', '==', classTeacherOf),
+    );
+    const existingClassTeacherSnapshot = await getDocs(existingClassTeacherQuery);
+
+    await Promise.all(
+      existingClassTeacherSnapshot.docs.map(doc =>
+        setDoc(
+          doc.ref,
+          {
+            isClassTeacher: false,
+            classTeacherOf: null,
+          },
+          { merge: true },
+        ),
+      ),
+    );
+  }
+
+  // Create teacher document
+  const newTeacherId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const teacherData = {
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    password, // ⚠️ NOTE: In production, this should be hashed
+    role: 'teacher' as const,
+    school,
+    subject: subject.trim(),
+    assignedClasses,
+    isClassTeacher,
+    classTeacherOf: isClassTeacher && classTeacherOf ? classTeacherOf : null,
+    createdAt: serverTimestamp(),
+  };
+
+  await setDoc(doc(db, 'users', newTeacherId), teacherData);
+
+  // If class teacher, update the classes collection
+  if (isClassTeacher && classTeacherOf) {
+    const classQuery = query(
+      collection(db, 'classes'),
+      where('name', '==', classTeacherOf),
+      where('school', '==', school),
+    );
+    const classSnapshot = await getDocs(classQuery);
+
+    if (!classSnapshot.empty) {
+      await setDoc(
+        doc(db, 'classes', classSnapshot.docs[0].id),
+        {
+          classTeacher: {
+            teacherId: newTeacherId,
+            teacherName: name.trim(),
+          },
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+    }
+  }
+
+  return newTeacherId;
+}
