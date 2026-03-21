@@ -5,6 +5,27 @@
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Smart Pack App UI Design</title>
+      <script>
+        (function () {
+          var valid = { light: true, dark: true, system: true };
+          var theme = 'dark';
+
+          try {
+            var stored = localStorage.getItem('theme');
+            if (stored && valid[stored]) theme = stored;
+          } catch (e) {}
+
+          var prefersDark =
+            typeof window.matchMedia === 'function' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var effective = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          root.classList.add(effective);
+          root.style.colorScheme = effective;
+        })();
+      </script>
     </head>
 
     <body>

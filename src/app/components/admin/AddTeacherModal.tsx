@@ -117,7 +117,7 @@ export function AddTeacherModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800 text-white">
+      <DialogContent className="max-w-2xl bg-card border-border text-foreground">
         <DialogHeader>
           <DialogTitle>Add New Teacher</DialogTitle>
           <DialogDescription>Create a new teacher account with subject and class assignments</DialogDescription>
@@ -126,10 +126,10 @@ export function AddTeacherModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info Section */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-sm text-zinc-300">Basic Information</h3>
+            <h3 className="font-semibold text-sm text-muted-foreground/80">Basic Information</h3>
 
             <div>
-              <label className="text-sm text-zinc-400 block mb-2">Full Name *</label>
+              <label className="text-sm text-muted-foreground block mb-2">Full Name *</label>
               <Input
                 placeholder="e.g., Nithya Menon"
                 value={formData.name}
@@ -140,7 +140,7 @@ export function AddTeacherModal({
             </div>
 
             <div>
-              <label className="text-sm text-zinc-400 block mb-2">Email *</label>
+              <label className="text-sm text-muted-foreground block mb-2">Email *</label>
               <Input
                 type="email"
                 placeholder="teacher@school.edu"
@@ -189,7 +189,7 @@ export function AddTeacherModal({
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-800 border-zinc-700">
                   {subjects.map(subject => (
-                    <SelectItem key={subject} value={subject} className="text-white">
+                    <SelectItem key={subject} value={subject} className="text-foreground">
                       {subject}
                     </SelectItem>
                   ))}
@@ -206,7 +206,7 @@ export function AddTeacherModal({
               <label className="text-sm text-zinc-400 block mb-2">Assign Classes *</label>
               <div className="flex flex-wrap gap-2 p-3 bg-zinc-800 rounded-lg border border-zinc-700">
                 {classes.length === 0 ? (
-                  <p className="text-sm text-zinc-500">No classes available</p>
+                  <p className="text-sm text-muted-foreground">No classes available</p>
                 ) : (
                   classes.map(cls => (
                     <button
@@ -216,8 +216,8 @@ export function AddTeacherModal({
                       disabled={isLoading}
                       className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                         formData.assignedClasses.includes(cls)
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-zinc-700 text-zinc-300 hover:bg-zinc-600'
+                          ? 'bg-indigo-600 text-foreground'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80'
                       }`}
                     >
                       {cls}
@@ -226,7 +226,7 @@ export function AddTeacherModal({
                 )}
               </div>
               {formData.assignedClasses.length > 0 && (
-                <p className="text-xs text-zinc-500 mt-2">
+                <p className="text-xs text-muted-foreground/70 mt-2">
                   Selected: {formData.assignedClasses.join(', ')}
                 </p>
               )}
@@ -248,7 +248,7 @@ export function AddTeacherModal({
                   disabled={isLoading}
                   className="w-4 h-4 rounded border-zinc-600 bg-zinc-700 cursor-pointer"
                 />
-                <label htmlFor="isClassTeacher" className="text-sm font-medium text-zinc-300 cursor-pointer">
+                <label htmlFor="isClassTeacher" className="text-sm font-medium text-muted-foreground/80 cursor-pointer">
                   Make this teacher a class teacher
                 </label>
               </div>
@@ -262,7 +262,7 @@ export function AddTeacherModal({
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-800 border-zinc-700">
                       {formData.assignedClasses.map(cls => (
-                        <SelectItem key={cls} value={cls} className="text-white">
+                        <SelectItem key={cls} value={cls} className="text-foreground">
                           {cls}
                         </SelectItem>
                       ))}
@@ -280,7 +280,7 @@ export function AddTeacherModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
-              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+              className="border-border text-muted-foreground hover:bg-muted/50"
             >
               Cancel
             </Button>

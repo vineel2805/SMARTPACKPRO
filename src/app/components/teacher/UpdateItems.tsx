@@ -120,8 +120,8 @@ export function UpdateItems() {
   const doNotBringItems = items.filter(i => i.type === 'do-not-bring');
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-24">
-      <header className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 px-4 py-4">
+    <div className="min-h-screen bg-background text-foreground pb-24">
+      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <Link to="/teacher">
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -132,10 +132,10 @@ export function UpdateItems() {
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-md mx-auto px-4 py-6 space-y-6 pb-40">
         {/* Class Selection */}
         <section>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Select Class(es)</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Select Class(es)</h3>
           <div className="flex flex-wrap gap-2">
             {availableClasses.map(cls => (
               <button
@@ -143,8 +143,8 @@ export function UpdateItems() {
                 onClick={() => toggleClassSelection(cls)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedClasses.includes(cls)
-                    ? 'bg-indigo-500 text-white'
-                    : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700'
+                    ? 'bg-indigo-500 text-foreground'
+                    : 'bg-muted text-muted-foreground border border-border hover:border-border/80'
                 }`}
               >
                 {cls}
@@ -155,8 +155,8 @@ export function UpdateItems() {
 
         {teacherSubject && (
           <section>
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">Instruction Type</h3>
-            <div className="grid grid-cols-2 gap-2 bg-zinc-900 p-1 rounded-lg">
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Instruction Type</h3>
+            <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg">
               <button
                 onClick={() => setScope('subject')}
                 className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
@@ -180,21 +180,21 @@ export function UpdateItems() {
               </button>
             </div>
             {!isClassTeacher && (
-              <p className="text-xs text-zinc-500 mt-2">Only class teachers can send general instructions.</p>
+              <p className="text-xs text-muted-foreground/70 mt-2">Only class teachers can send general instructions.</p>
             )}
           </section>
         )}
 
         {/* Action Toggle */}
         <section>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Action</h3>
-          <div className="grid grid-cols-2 gap-2 bg-zinc-900 p-1 rounded-lg">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Action</h3>
+          <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg">
             <button
               onClick={() => setAction('bring')}
               className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
                 action === 'bring'
-                  ? 'bg-green-500 text-white'
-                  : 'text-zinc-400 hover:text-zinc-300'
+                  ? 'bg-green-500 text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               }`}
             >
               Bring
@@ -203,8 +203,8 @@ export function UpdateItems() {
               onClick={() => setAction('do-not-bring')}
               className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
                 action === 'do-not-bring'
-                  ? 'bg-red-500 text-white'
-                  : 'text-zinc-400 hover:text-zinc-300'
+                  ? 'bg-red-500 text-foreground'
+                  : 'text-muted-foreground hover:text-foreground/80'
               }`}
             >
               Do NOT Bring
@@ -214,13 +214,13 @@ export function UpdateItems() {
 
         {/* Quick Suggestions */}
         <section>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Quick Add</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Quick Add</h3>
           <div className="flex flex-wrap gap-2">
             {getQuickSuggestions().map(suggestion => (
               <button
                 key={suggestion}
                 onClick={() => addItem(suggestion)}
-                className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 hover:border-indigo-500/50 rounded-full text-sm text-zinc-300 hover:text-white transition-colors active:scale-95"
+                className="px-3 py-1.5 bg-muted border border-border hover:border-indigo-500/50 rounded-full text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
               >
                 {suggestion}
               </button>
@@ -230,7 +230,7 @@ export function UpdateItems() {
 
         {/* Custom Input */}
         <section>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Add Custom Item</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Add Custom Item</h3>
           <div className="flex gap-2">
             <input
               type="text"
@@ -238,7 +238,7 @@ export function UpdateItems() {
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addItem(inputValue)}
               placeholder="Type item name..."
-              className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg outline-none focus:border-indigo-500 transition-colors"
+              className="flex-1 px-4 py-3 bg-muted border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors text-foreground"
             />
             <Button
               onClick={() => addItem(inputValue)}
@@ -253,11 +253,11 @@ export function UpdateItems() {
         {/* Live Preview */}
         {items.length > 0 && (
           <section>
-            <h3 className="text-sm font-medium text-zinc-400 mb-2">Preview</h3>
+            <h3 className="text-sm font-medium text-muted-foreground mb-2">Preview</h3>
             <div className="space-y-4">
               {bringItems.length > 0 && (
                 <div>
-                  <p className="text-xs text-zinc-500 mb-2">TO BRING ({bringItems.length})</p>
+                  <p className="text-xs text-muted-foreground/70 mb-2">TO BRING ({bringItems.length})</p>
                   <div className="space-y-2">
                     {bringItems.map(item => (
                       <div
@@ -279,7 +279,7 @@ export function UpdateItems() {
 
               {doNotBringItems.length > 0 && (
                 <div>
-                  <p className="text-xs text-zinc-500 mb-2">DO NOT BRING ({doNotBringItems.length})</p>
+                  <p className="text-xs text-muted-foreground/70 mb-2">DO NOT BRING ({doNotBringItems.length})</p>
                   <div className="space-y-2">
                     {doNotBringItems.map(item => (
                       <div
@@ -304,7 +304,7 @@ export function UpdateItems() {
       </main>
 
       {/* Sticky Submit Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-zinc-950 via-zinc-950 to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
         <div className="max-w-md mx-auto">
           <Button
             onClick={handleSubmit}

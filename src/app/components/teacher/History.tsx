@@ -34,8 +34,8 @@ export function History() {
   }, [user?.assignedClasses]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-20">
-      <header className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 px-4 py-4">
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <Link to="/teacher">
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -47,8 +47,8 @@ export function History() {
       </header>
 
       <main className="max-w-md mx-auto px-4 py-6 space-y-4">
-        {isLoading && <p className="text-sm text-zinc-400">Loading history...</p>}
-        {!isLoading && history.length === 0 && <p className="text-sm text-zinc-400">No history found yet.</p>}
+        {isLoading && <p className="text-sm text-muted-foreground">Loading history...</p>}
+        {!isLoading && history.length === 0 && <p className="text-sm text-muted-foreground">No history found yet.</p>}
 
         {history.map(entry => {
           const date = new Date(entry.date);
@@ -61,12 +61,12 @@ export function History() {
           return (
             <div
               key={entry.id}
-              className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden"
+              className="bg-card rounded-xl border border-border overflow-hidden"
             >
               <div className="p-4 border-b border-zinc-800">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-zinc-500" />
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
                     <span className="text-sm font-medium">{formattedDate}</span>
                   </div>
                   <span className="text-xs px-2 py-1 bg-indigo-500/10 text-indigo-400 rounded-full border border-indigo-500/20">

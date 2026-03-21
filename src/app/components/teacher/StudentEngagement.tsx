@@ -111,8 +111,8 @@ export function StudentEngagement() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white pb-20">
-      <header className="sticky top-0 z-10 bg-zinc-900/80 backdrop-blur-sm border-b border-zinc-800 px-4 py-4">
+    <div className="min-h-screen bg-background text-foreground pb-20">
+      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
         <div className="max-w-md mx-auto flex items-center gap-3">
           <Link to="/teacher">
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -121,7 +121,7 @@ export function StudentEngagement() {
           </Link>
           <div className="flex-1">
             <h1 className="font-semibold">Student Engagement</h1>
-            <p className="text-xs text-zinc-400">Class {selectedClass || 'N/A'}</p>
+            <p className="text-xs text-muted-foreground">Class {selectedClass || 'N/A'}</p>
           </div>
         </div>
       </header>
@@ -135,8 +135,8 @@ export function StudentEngagement() {
                 onClick={() => setSelectedClass(cls)}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedClass === cls
-                    ? 'bg-indigo-500 text-white'
-                    : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                    ? 'bg-indigo-500 text-foreground'
+                    : 'bg-muted text-muted-foreground border border-border'
                 }`}
               >
                 {cls}

@@ -72,20 +72,20 @@ export function ChecklistAudit() {
 
   if (!selectedClass && classes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950">
-        <p className="text-zinc-400">No classes found</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+        <p className="text-muted-foreground">No classes found</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="flex">
         {/* Sidebar */}
         <aside className="hidden md:block w-64 border-r border-zinc-800 min-h-screen">
           <div className="p-6">
             <h1 className="text-xl font-semibold">Smart Pack App</h1>
-            <p className="text-sm text-zinc-500 mt-1">Admin Panel</p>
+            <p className="text-sm text-muted-foreground mt-1">Admin Panel</p>
           </div>
           <nav className="px-3 space-y-1">
             <Link
@@ -115,23 +115,23 @@ export function ChecklistAudit() {
             {/* Header */}
             <div className="mb-8">
               <h2 className="text-3xl font-bold">Checklist Audit</h2>
-              <p className="text-zinc-400 mt-2">View which teacher updates won for today's checklist</p>
+              <p className="text-muted-foreground mt-2">View which teacher updates won for today's checklist</p>
             </div>
 
             {/* Class Selector */}
-            <Card className="mb-6 border-zinc-800 bg-zinc-900">
+            <Card className="mb-6 border-border bg-card">
               <CardHeader>
-                <CardTitle className="text-white">Select Class</CardTitle>
+                <CardTitle className="text-foreground">Select Class</CardTitle>
                 <CardDescription>Choose a class to view checklist resolution details</CardDescription>
               </CardHeader>
               <CardContent>
                 <Select value={selectedClass} onValueChange={setSelectedClass}>
-                  <SelectTrigger className="w-full bg-zinc-800 border-zinc-700 text-white">
+                  <SelectTrigger className="w-full bg-muted border-border text-foreground">
                     <SelectValue placeholder="Select a class" />
                   </SelectTrigger>
                   <SelectContent className="bg-zinc-800 border-zinc-700">
                     {classes.map(className => (
-                      <SelectItem key={className} value={className} className="text-white">
+                      <SelectItem key={className} value={className} className="text-foreground">
                         {className}
                       </SelectItem>
                     ))}
@@ -141,7 +141,7 @@ export function ChecklistAudit() {
             </Card>
 
             {/* Audit Results */}
-            <Card className="border-zinc-800 bg-zinc-900">
+            <Card className="border-border bg-card">
               <CardHeader>
                 <CardTitle className="text-white">
                   {selectedClass} - {today}
@@ -155,11 +155,11 @@ export function ChecklistAudit() {
               <CardContent>
                 {loading ? (
                   <div className="text-center py-8">
-                    <p className="text-zinc-400">Loading...</p>
+                    <p className="text-muted-foreground">Loading...</p>
                   </div>
                 ) : auditData.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-zinc-400">No updates found for this class today</p>
+                    <p className="text-muted-foreground">No updates found for this class today</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -171,8 +171,8 @@ export function ChecklistAudit() {
                         {/* Item Header */}
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <p className="font-semibold text-white">{item.name}</p>
-                            <p className="text-sm text-zinc-400">
+                            <p className="font-semibold text-foreground">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">
                               Type:{' '}
                               <span
                                 className={
@@ -190,7 +190,7 @@ export function ChecklistAudit() {
                         {/* Sources/Conflicts */}
                         {item.sources.length > 0 && (
                           <div className="space-y-2 pt-3 border-t border-zinc-700">
-                            <p className="text-xs text-zinc-500 uppercase tracking-wider">
+                            <p className="text-xs text-muted-foreground/70 uppercase tracking-wider">
                               Update Sources ({item.sources.length})
                             </p>
                             {item.sources.map((source, sourceIdx) => (
@@ -203,7 +203,7 @@ export function ChecklistAudit() {
                                 }`}
                               >
                                 <div className="flex-1">
-                                  <p className="text-white">
+                                  <p className="text-foreground">
                                     {source.teacherName}
                                     <span
                                       className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
@@ -217,7 +217,7 @@ export function ChecklistAudit() {
                                         : `Subject Teacher (${source.teacherSubject})`}
                                     </span>
                                   </p>
-                                  <p className="text-xs text-zinc-400 mt-1">
+                                  <p className="text-xs text-muted-foreground mt-1">
                                     Priority: {source.priority}
                                   </p>
                                 </div>
@@ -239,9 +239,9 @@ export function ChecklistAudit() {
             </Card>
 
             {/* Info Box */}
-            <Card className="mt-6 border-zinc-800 bg-zinc-900/50">
+            <Card className="mt-6 border-border bg-card/50">
               <CardContent className="pt-6">
-                <div className="space-y-2 text-sm text-zinc-400">
+                <div className="space-y-2 text-sm text-muted-foreground">
                   <p>
                     <span className="text-indigo-400 font-semibold">Class Teachers</span> have{' '}
                     <span className="font-semibold">priority 2</span> and override subject teachers.

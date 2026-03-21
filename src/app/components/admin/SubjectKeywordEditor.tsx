@@ -103,15 +103,15 @@ export function SubjectKeywordEditor() {
   };
 
   if (loading) {
-    return <div className="text-zinc-400">Loading...</div>;
+    return <div className="text-muted-foreground">Loading...</div>;
   }
 
   return (
     <div className="space-y-6">
       {/* Add Subject Section */}
-      <Card className="border-zinc-800 bg-zinc-900">
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-white">Add New Subject</CardTitle>
+          <CardTitle className="text-foreground">Add New Subject</CardTitle>
           <CardDescription>Create a new subject category for keyword mapping</CardDescription>
         </CardHeader>
         <CardContent>
@@ -120,7 +120,7 @@ export function SubjectKeywordEditor() {
               placeholder="e.g., Physics, Computer Science"
               value={currentSubject}
               onChange={e => setCurrentSubject(e.target.value)}
-              className="flex-1 bg-zinc-800 border-zinc-700 text-white"
+              className="flex-1 bg-muted border-border text-foreground"
             />
             <Button onClick={handleAddSubject} className="bg-indigo-600 hover:bg-indigo-700">
               <Plus className="w-4 h-4 mr-2" />
@@ -132,10 +132,10 @@ export function SubjectKeywordEditor() {
 
       {/* Keyword Mapping Sections */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-white">Subject Keywords</h3>
+        <h3 className="text-lg font-semibold text-foreground">Subject Keywords</h3>
 
         {Object.keys(keywordMap).length === 0 ? (
-          <div className="text-center py-8 text-zinc-400">
+          <div className="text-center py-8 text-muted-foreground">
             <p>No subjects configured yet. Add a subject above to begin.</p>
           </div>
         ) : (
@@ -144,7 +144,7 @@ export function SubjectKeywordEditor() {
               <Card key={subject} className="border-zinc-800 bg-zinc-800/50">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-white capitalize">{subject}</CardTitle>
+                    <CardTitle className="text-foreground capitalize">{subject}</CardTitle>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -170,7 +170,7 @@ export function SubjectKeywordEditor() {
                           onKeyPress={e => {
                             if (e.key === 'Enter') handleAddKeyword();
                           }}
-                          className="flex-1 bg-zinc-700 border-zinc-600 text-white"
+                          className="flex-1 bg-muted/50 border-border text-foreground"
                         />
                         <Button
                           onClick={handleAddKeyword}
@@ -188,12 +188,12 @@ export function SubjectKeywordEditor() {
                           {keywords.map(keyword => (
                             <div
                               key={keyword}
-                              className="flex items-center gap-2 px-3 py-1 bg-zinc-600 rounded-full text-sm text-white"
+                              className="flex items-center gap-2 px-3 py-1 bg-muted rounded-full text-sm text-foreground"
                             >
                               <span>{keyword}</span>
                               <button
                                 onClick={() => handleRemoveKeyword(subject, keyword)}
-                                className="text-zinc-300 hover:text-red-400"
+                                className="text-muted-foreground hover:text-red-400"
                               >
                                 <X className="w-3 h-3" />
                               </button>
@@ -201,7 +201,7 @@ export function SubjectKeywordEditor() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-zinc-500 italic">No keywords yet</p>
+                        <p className="text-xs text-muted-foreground/70 italic">No keywords yet</p>
                       )}
                     </>
                   }
