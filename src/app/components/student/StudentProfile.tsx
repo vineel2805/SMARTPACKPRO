@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router';
 
 export function StudentProfile() {
   const { user, logout } = useAuth();
-  const { theme, setTheme, effectiveTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {

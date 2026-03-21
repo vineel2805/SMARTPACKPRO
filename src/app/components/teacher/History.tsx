@@ -63,7 +63,7 @@ export function History() {
               key={entry.id}
               className="bg-card rounded-xl border border-border overflow-hidden"
             >
-              <div className="p-4 border-b border-zinc-800">
+              <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -88,7 +88,7 @@ export function History() {
                     </div>
                     <div className="pl-7 space-y-1">
                       {entry.itemsAdded.map((item, idx) => (
-                        <p key={idx} className="text-sm text-zinc-400">
+                        <p key={idx} className="text-sm text-muted-foreground">
                           • {item}
                         </p>
                       ))}
@@ -108,7 +108,7 @@ export function History() {
                     </div>
                     <div className="pl-7 space-y-1">
                       {entry.itemsRemoved.map((item, idx) => (
-                        <p key={idx} className="text-sm text-zinc-400">
+                        <p key={idx} className="text-sm text-muted-foreground">
                           • {item}
                         </p>
                       ))}

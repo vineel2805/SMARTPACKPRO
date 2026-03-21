@@ -10,7 +10,7 @@ import {
 } from 'firebase/firestore';
 
 const BATCH_LIMIT = 450;
-const STUDENTS_PER_CLASS = 40;
+const STUDENTS_PER_CLASS = 3;
 
 function slug(value) {
   return value

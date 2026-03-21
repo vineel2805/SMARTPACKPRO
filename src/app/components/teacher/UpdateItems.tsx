@@ -161,8 +161,8 @@ export function UpdateItems() {
                 onClick={() => setScope('subject')}
                 className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
                   scope === 'subject'
-                    ? 'bg-indigo-500 text-white'
-                    : 'text-zinc-400 hover:text-zinc-300'
+                    ? 'bg-indigo-500 text-foreground'
+                    : 'text-muted-foreground hover:text-foreground/80'
                 }`}
               >
                 Subject ({teacherSubject})
@@ -172,8 +172,8 @@ export function UpdateItems() {
                 disabled={!isClassTeacher}
                 className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
                   scope === 'general'
-                    ? 'bg-indigo-500 text-white'
-                    : 'text-zinc-400 hover:text-zinc-300'
+                    ? 'bg-indigo-500 text-foreground'
+                    : 'text-muted-foreground hover:text-foreground/80'
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
               >
                 General
@@ -304,12 +304,12 @@ export function UpdateItems() {
       </main>
 
       {/* Sticky Submit Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background to-transparent">
+      <div className="fixed bottom-16 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background to-transparent">
         <div className="max-w-md mx-auto">
           <Button
             onClick={handleSubmit}
             disabled={items.length === 0 || isSaving || selectedClasses.length === 0}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 h-12 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-indigo-500 hover:bg-indigo-600 h-12 text-base font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving
               ? 'Sending Update...'

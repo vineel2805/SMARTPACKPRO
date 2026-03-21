@@ -65,9 +65,9 @@ export function StudentEngagement() {
     },
     'not-seen': {
       icon: AlertCircle,
-      color: 'text-zinc-400',
-      bg: 'bg-zinc-800',
-      border: 'border-zinc-700',
+      color: 'text-muted-foreground',
+      bg: 'bg-muted',
+      border: 'border-border',
       label: 'Not Seen',
       description: 'Hasn\'t opened app',
     },
@@ -159,12 +159,12 @@ export function StudentEngagement() {
                 className={`p-3 rounded-lg border transition-colors ${
                   isActive
                     ? `${config.bg} ${config.border}`
-                    : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                    : 'bg-card border-border hover:border-border/80'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${config.color} mb-1`} />
                 <p className="text-xl font-semibold">{count}</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">{config.label}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{config.label}</p>
               </button>
             );
           })}
@@ -177,8 +177,8 @@ export function StudentEngagement() {
               onClick={() => setFilter('all')}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 filter === 'all'
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                  ? 'bg-indigo-500 text-foreground'
+                  : 'bg-card text-muted-foreground border border-border'
               }`}
             >
               All ({students.length})
@@ -191,8 +191,8 @@ export function StudentEngagement() {
                   onClick={() => setFilter(key as StatusFilter)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                     filter === key
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-zinc-900 text-zinc-400 border border-zinc-800'
+                      ? 'bg-indigo-500 text-foreground'
+                      : 'bg-card text-muted-foreground border border-border'
                   }`}
                 >
                   {config.label} ({count})
@@ -204,9 +204,9 @@ export function StudentEngagement() {
 
         {/* Student List */}
         <section className="space-y-2">
-          {isLoading && <p className="text-sm text-zinc-400">Loading engagement...</p>}
+          {isLoading && <p className="text-sm text-muted-foreground">Loading engagement...</p>}
           {!isLoading && filteredStudents.length === 0 && (
-            <p className="text-sm text-zinc-400">No engagement records found for this class.</p>
+            <p className="text-sm text-muted-foreground">No engagement records found for this class.</p>
           )}
 
           {filteredStudents.map(student => {
@@ -217,22 +217,22 @@ export function StudentEngagement() {
               <div
                 key={student.id}
                 className={`p-4 rounded-lg border ${
-                  student.status === 'inactive' ? 'bg-red-500/5 border-red-500/20' : 'bg-zinc-900 border-zinc-800'
+                  student.status === 'inactive' ? 'bg-red-500/5 border-red-500/20' : 'bg-card border-border'
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium">{student.name}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5">{student.class}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{student.class}</p>
                   </div>
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${config.bg} ${config.border} border`}>
                     <Icon className={`w-3 h-3 ${config.color}`} />
                     <span className={config.color}>{config.label}</span>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-400 mb-2">{config.description}</p>
+                <p className="text-xs text-muted-foreground mb-2">{config.description}</p>
                 {student.lastSeen && (
-                  <p className="text-xs text-zinc-500">Last seen: {student.lastSeen}</p>
+                  <p className="text-xs text-muted-foreground">Last seen: {student.lastSeen}</p>
                 )}
               </div>
             );
