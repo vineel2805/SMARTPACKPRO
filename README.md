@@ -87,12 +87,15 @@ Smart Pack App is a production-ready, mobile-first web application designed to h
 
 - **Framework**: React 18.3.1
 - **Router**: React Router 7.13.0
+- **Build Tool**: Vite 6.3.5
 - **Styling**: Tailwind CSS 4.1.12
 - **UI Components**: Radix UI
 - **Icons**: Lucide React
 - **Notifications**: Sonner
-- **State Management**: React Context API
-- **Data Persistence**: localStorage (demo)
+- **Database**: Firebase Firestore (Real-time document store)
+- **Hosting**: Firebase Hosting
+- **State Management**: React Context API (Auth & Theme)
+- **Data Persistence**: Firestore (users, schools, classes, packing items, engagement tracking)
 
 ##  Navigation Structure
 
@@ -112,23 +115,20 @@ Smart Pack App is a production-ready, mobile-first web application designed to h
 - Sidebar navigation (desktop)
 - Dashboard and Teachers Management
 
-##  User Roles & Demo Credentials
+##  User Roles & Test Credentials
 
-The app supports 3 roles with instant demo login (no password required):
+The app supports 3 roles with Firestore-based authentication. Test credentials are available in [credential.md](credential.md).
 
-### Student
-- Name: Alex Johnson
-- Class: 6-A
-- School: Springfield High School
+### Test Schools
+1. **Green Valley Public School** (10 grades, 3 students per grade)
+2. **Sunrise International School** (10 grades, 3 students per grade)
 
-### Teacher
-- Name: Dr. Sarah Johnson
-- Subject: Mathematics
-- Classes: 6-A, 6-B, 7-A
+### Test Accounts Available
+- **Admin**: 1 per school
+- **Teachers**: 10 per school (1 per subject)
+- **Students**: 30 per school (3 per grade, grades 1-10)
 
-### Admin
-- Name: Principal Anderson
-- School: Springfield High School
+See [credential.md](credential.md) for complete username/password list.
 
 ##  User Flows
 
@@ -154,15 +154,20 @@ The app supports 3 roles with instant demo login (no password required):
 4. Assign class teachers
 5. Monitor system alerts
 
-##  Data Structure
+##  Data Structure (Firestore Collections)
 
-### Mock Data Includes:
-- 8 packing items (sample)
-- 6 classes (6-A, 6-B, 7-A, 7-B, 8-A, 8-B)
-- 12 quick suggestions
-- 5 teachers with assignments
-- 8 students with engagement status
-- 3 history entries
+### Core Collections:
+- **users**: Schools, teachers, students, admins with roles, assignments, contact info
+- **schools**: School metadata (name, location, contact)
+- **classes**: Class definitions grouped by grade and school
+- **teacherAssignments**: Maps teachers to their assigned classes
+- **studentEngagement**: Real-time engagement tracking (status: completed, in-progress, seen, not-seen, inactive)
+- **teacerUpdates**: Historical audit trail of teacher packing list updates
+- **schoolKeywordConfigs**: Subject-specific keyword restrictions (prevents cross-subject updates)
+
+### Seed Data (Development):
+- Run `node scripts/seed-real-school-data.mjs` to populate Firestore with test schools, teachers, students, and classes
+- 2 schools × 10 grades × 3 students = 60 students + 20 teachers + 2 admins = 82 total users
 
 ##  Component Library
 
@@ -181,29 +186,56 @@ The app supports 3 roles with instant demo login (no password required):
 
 ##  Theme System
 
-### Implementation
-- CSS variables in `/src/styles/theme.css`
-- Context-based theme management
+### Production-Grade Implementation
+- **SSR-Safe**: DOM detection prevents hydration mismatches
+- **System Sync**: Listens to `prefers-color-scheme` media query with Safari fallback
+- **FOUC Prevention**: Pre-hydration script in `index.html` applies correct theme before React mounts
+- **Storage Validation**: localStorage values validated before use (no unsafe coercion)
+- **Smooth Transitions**: Automatically suppresses CSS transitions during theme changes
+- **CSS Variables**: Variables in `/src/styles/theme.css` for easy customization
+
+### Modes Supported
+- Light mode
+- Dark mode
+- System preference (auto-sync)
 - Persists to localStorage
-- Supports:
-  - Light mode
-  - Dark mode (default)
-  - System preference
 
 ### Color Tokens
-- Background, foreground
-- Card backgrounds
-- Border colors
-- Muted text
-- Primary/secondary colors
-- Success/destructive states
+- `--background`, `--foreground` (base colors)
+- `--card`, `--card-foreground` (card backgrounds)
+- `--border`, `--muted-foreground` (subtle UI)
+- `--secondary`, `--accent`, `--destructive` (semantic colors)
+- Subject-specific color tags
 
 ##  Getting Started
 
+### Local Development
 ```bash
-# The app is ready to run
-# No additional setup required
-# Open in browser and select a role to login
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+### Firebase Setup
+1. Create `.env.local` with Firebase config (ask for values if needed)
+2. Configure Firestore security rules in Firebase Console
+3. Seed test data: `node scripts/seed-real-school-data.mjs`
+4. Test login with credentials from [credential.md](credential.md)
+
+### Deployment (Firebase Hosting)
+```bash
+# Build the app
+npm run build
+
+# Deploy to Firebase Hosting
+firebase deploy --only hosting
+
+# App will be available at: https://smartpackpro-ff9cf.web.app
 ```
 
 ##  Responsive Design
@@ -238,18 +270,25 @@ Toast notifications for:
 5. **Fast**: Optimized for speed
 6. **No Chat UI**: Simple, direct communication
 
-##  Future Enhancements
+##  Completed Features
 
-To make this production-ready with real data:
+✅ **Real Backend**: Firebase Firestore integration (not mock data)  
+✅ **Authentication**: Firestore-based login (school + role + email + password)  
+✅ **Multi-School Support**: Green Valley Public School & Sunrise International School  
+✅ **Real-Time Engagement Tracking**: Live status updates synchronized to Firestore  
+✅ **Production-Grade Theme System**: SSR-safe, system sync, FOUC prevention  
+✅ **Teacher Update Audit Trail**: Historical tracking of packing list changes  
+✅ **Subject-Based Keyword Restrictions**: Prevents cross-subject item updates  
+✅ **Deployed to Firebase Hosting**: https://smartpackpro-ff9cf.web.app  
 
-1. **Backend Integration**: Replace mock data with API calls
-2. **Authentication**: Implement proper auth (OAuth, JWT)
-3. **Real-time Updates**: WebSocket for live engagement tracking
-4. **Push Notifications**: Remind students to check lists
-5. **Analytics**: Track usage patterns
-6. **Offline Support**: Service worker & offline capability
-7. **Multi-school**: Support for multiple schools
-8. **Reports**: Generate packing compliance reports
+##  Potential Future Enhancements
+
+1. **Push Notifications**: Remind students via push (currently toast-only)
+2. **Analytics Dashboard**: Engagement trends, compliance reports
+3. **Offline Support**: Service worker for offline app functionality
+4. **Email Notifications**: Teacher reminders via email
+5. **Mobile App**: Native iOS/Android apps with offline syncing
+6. **Parent Portal**: Parents can view student packing progress
 
 ##  Product Highlights
 
