@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Users, School, AlertTriangle } from 'lucide-react';
+import { Users, School, AlertTriangle, Settings } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '../ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { getClasses, getRecentHistory, getTeachers } from '../../services/firestoreService';
+import { SubjectKeywordEditor } from './SubjectKeywordEditor';
 import type { AppUser, HistoryEntry } from '../../types/models';
 import { toast } from 'sonner';
 
@@ -10,6 +12,7 @@ export function AdminDashboard() {
   const [teachers, setTeachers] = useState<AppUser[]>([]);
   const [classes, setClasses] = useState<string[]>([]);
   const [recentHistory, setRecentHistory] = useState<HistoryEntry[]>([]);
+  const [showKeywordSettings, setShowKeywordSettings] = useState(false);
 
   useEffect(() => {
     async function loadAdminData() {
@@ -71,9 +74,20 @@ export function AdminDashboard() {
 
         {/* Main Content */}
         <main className="flex-1">
-          <header className="border-b border-zinc-800 px-6 py-4">
-            <h2 className="text-xl font-semibold">Dashboard</h2>
-            <p className="text-sm text-zinc-400 mt-0.5">Overview of school management</p>
+          <header className="border-b border-zinc-800 px-6 py-4 flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold">Dashboard</h2>
+              <p className="text-sm text-zinc-400 mt-0.5">Overview of school management</p>
+            </div>
+            <Button
+              onClick={() => setShowKeywordSettings(true)}
+              variant="outline"
+              size="sm"
+              className="border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Subject Keywords
+            </Button>
           </header>
 
           <div className="p-6 space-y-6">
@@ -163,6 +177,21 @@ export function AdminDashboard() {
           </div>
         </main>
       </div>
+
+      {/* Keyword Settings Dialog */}
+      <Dialog open={showKeywordSettings} onOpenChange={setShowKeywordSettings}>
+        <DialogContent className="max-w-2xl bg-zinc-900 border-zinc-800 text-white">
+          <DialogHeader>
+            <DialogTitle>Subject Keyword Configuration</DialogTitle>
+            <DialogDescription>
+              Configure keywords for each subject to prevent cross-subject teacher updates
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-96 overflow-y-auto">
+            <SubjectKeywordEditor />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

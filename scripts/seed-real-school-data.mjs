@@ -284,6 +284,14 @@ function buildSeedDocuments() {
     const schoolDocId = `school_${schoolSlug}`;
     const principalId = `user_${schoolSlug}_principal`;
 
+    const subjectKeywordMap = {
+      mathematics: ['math', 'maths', 'mathematics', 'algebra', 'geometry'],
+      science: ['science', 'lab', 'chemistry', 'physics', 'biology'],
+      english: ['english', 'grammar', 'literature', 'reading'],
+      'social studies': ['social', 'history', 'civics', 'geography'],
+      hindi: ['hindi'],
+    };
+
     docs.push({
       collection: 'schools',
       id: schoolDocId,
@@ -293,6 +301,7 @@ function buildSeedDocuments() {
         principalUserId: principalId,
         gradeCount: school.grades.length,
         subjects: school.subjects,
+        subjectKeywordMap,
         createdAt: serverTimestamp(),
       },
     });

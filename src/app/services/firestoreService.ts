@@ -177,7 +177,7 @@ function normalizeSubject(subject?: string) {
   return String(subject ?? '').trim().toLowerCase();
 }
 
-const subjectKeywordMap: Record<string, string[]> = {
+const defaultSubjectKeywordMap: Record<string, string[]> = {
   mathematics: ['math', 'maths', 'mathematics', 'algebra', 'geometry'],
   science: ['science', 'lab', 'chemistry', 'physics', 'biology'],
   english: ['english', 'grammar', 'literature', 'reading'],
@@ -185,15 +185,36 @@ const subjectKeywordMap: Record<string, string[]> = {
   hindi: ['hindi'],
 };
 
-function hasCrossSubjectKeyword(itemName: string, teacherSubject?: string) {
+function hasCrossSubjectKeyword(
+  itemName: string,
+  teacherSubject?: string,
+  keywordMap: Record<string, string[]> = defaultSubjectKeywordMap,
+) {
   const text = normalizeItemName(itemName);
   const ownSubject = normalizeSubject(teacherSubject);
 
-  const ownKeywords = new Set(subjectKeywordMap[ownSubject] ?? []);
+  const ownKeywords = new Set(keywordMap[ownSubject] ?? []);
 
-  return Object.values(subjectKeywordMap)
+  return Object.values(keywordMap)
     .flat()
     .some(keyword => !ownKeywords.has(keyword) && text.includes(keyword));
+}
+
+async function getSchoolConfig(schoolName: string) {
+  const schoolsQuery = query(
+    collection(db, 'schools'),
+    where('name', '==', schoolName),
+    limit(1),
+  );
+  const snapshot = await getDocs(schoolsQuery);
+  if (snapshot.empty) {
+    return { subjectKeywordMap: defaultSubjectKeywordMap };
+  }
+
+  const data = snapshot.docs[0].data();
+  const keywordMap = data.subjectKeywordMap ?? defaultSubjectKeywordMap;
+
+  return { subjectKeywordMap: keywordMap };
 }
 
 type TeacherUpdateRecord = {
@@ -396,6 +417,9 @@ export async function submitTeacherUpdates(params: {
     throw new Error('Only teachers can send updates');
   }
 
+  const schoolName = String(teacherData.school ?? '');
+  const schoolConfig = await getSchoolConfig(schoolName);
+
   const assignedClasses = Array.isArray(teacherData.assignedClasses) ? teacherData.assignedClasses : [];
   const invalidClasses = classNames.filter(className => !assignedClasses.includes(className));
   if (invalidClasses.length) {
@@ -422,7 +446,9 @@ export async function submitTeacherUpdates(params: {
       throw new Error('Subject teachers can only send updates for their own subject');
     }
 
-    const crossSubjectItems = items.filter(item => hasCrossSubjectKeyword(item.name, subjectFromDb));
+    const crossSubjectItems = items.filter(item =>
+      hasCrossSubjectKeyword(item.name, subjectFromDb, schoolConfig.subjectKeywordMap),
+    );
     if (crossSubjectItems.length) {
       throw new Error('Item list contains content that belongs to another subject');
     }
@@ -741,4 +767,31 @@ export async function getChecklistAuditData(className: string, date: string) {
   const updates = updatesSnapshot.docs.map(item => item.data() as TeacherUpdateRecord);
 
   return mergeChecklistWithAuditTracking(updates);
+}
+
+export async function getSchoolKeywordConfig(schoolName: string): Promise<Record<string, string[]>> {
+  const result = await getSchoolConfig(schoolName);
+  return result.subjectKeywordMap;
+}
+
+export async function updateSchoolKeywordConfig(
+  schoolName: string,
+  keywordMap: Record<string, string[]>,
+): Promise<void> {
+  const schoolsQuery = query(
+    collection(db, 'schools'),
+    where('name', '==', schoolName),
+    limit(1),
+  );
+  const snapshot = await getDocs(schoolsQuery);
+  if (snapshot.empty) {
+    throw new Error('School not found');
+  }
+
+  const schoolId = snapshot.docs[0].id;
+  await setDoc(
+    doc(db, 'schools', schoolId),
+    { subjectKeywordMap: keywordMap },
+    { merge: true },
+  );
 }
