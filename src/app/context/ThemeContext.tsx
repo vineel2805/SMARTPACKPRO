@@ -27,7 +27,7 @@ interface ThemeProviderProps {
 }
 
 const THEME_QUERY = '(prefers-color-scheme: dark)';
-const DEFAULT_THEME: Theme = 'dark';
+const DEFAULT_THEME: Theme = 'system';
 const DEFAULT_STORAGE_KEY = 'theme';
 const VALID_THEMES: readonly Theme[] = ['light', 'dark', 'system'];
 

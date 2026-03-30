@@ -141,9 +141,9 @@ export function TodaysBag() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B0F1A] text-white flex items-start justify-center">
-        <div className="w-full max-w-[360px] h-screen max-h-[800px] px-4 pt-5 pb-6">
-          <p className="text-sm text-[#9CA3AF]">Loading your packing list...</p>
+      <div className="min-h-dvh bg-background text-foreground">
+        <div className="mx-auto w-full max-w-md px-4 pt-5 pb-6">
+          <p className="text-sm text-muted-foreground">Loading your packing list...</p>
         </div>
       </div>
     );
@@ -151,14 +151,14 @@ export function TodaysBag() {
 
   if (totalCount === 0 && doNotBringItems.length === 0) {
     return (
-      <div className="min-h-screen bg-[#0B0F1A] text-white flex items-start justify-center">
-        <div className="w-full max-w-[360px] h-screen max-h-[800px] px-4 pt-5 pb-6 flex flex-col">
+      <div className="min-h-dvh bg-background text-foreground">
+        <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-5 pb-6">
           <h1 className="text-[20px] font-semibold">Today's Bag</h1>
-          <p className="text-[13px] text-[#9CA3AF] mt-1">{today}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{today}</p>
           <div className="flex-1 flex items-center justify-center text-center">
             <div>
-              <Package className="w-10 h-10 mx-auto text-[#9CA3AF]" />
-              <p className="mt-4 text-sm text-[#9CA3AF]">No items assigned today.</p>
+              <Package className="w-10 h-10 mx-auto text-muted-foreground" />
+              <p className="mt-4 text-sm text-muted-foreground">No items assigned today.</p>
             </div>
           </div>
         </div>
@@ -167,43 +167,43 @@ export function TodaysBag() {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#020617_0%,#0B1220_55%,#0B0F1A_100%)] text-white flex items-start justify-center">
-      <div className="w-full max-w-[360px] h-screen max-h-[800px] px-4 pt-5 pb-6 flex flex-col overflow-hidden">
+    <div className="min-h-dvh bg-background text-foreground">
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-5 pb-6">
         <header>
           <div className="flex items-center justify-between pb-2">
-            <h1 className="text-[20px] font-semibold text-white">Today's Bag</h1>
+            <h1 className="text-[20px] font-semibold text-foreground">Today's Bag</h1>
             <Link to="/student/profile" aria-label="Open profile">
-              <span className="w-10 h-10 rounded-full bg-[#111827] border border-[#1F2937] flex items-center justify-center transition-all duration-150 hover:bg-[#1F2937] active:scale-95">
-                <User className="w-[18px] h-[18px] text-[#D1D5DB]" />
+              <span className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center transition-all duration-150 hover:bg-muted active:scale-95">
+                <User className="w-[18px] h-[18px] text-muted-foreground" />
               </span>
             </Link>
           </div>
-          <p className="text-[13px] text-[#94A3B8] mt-1">{today}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{today}</p>
 
           <div className="mt-4 mb-6">
-            <div className="flex items-center justify-between text-[12px] text-[#94A3B8]">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>Progress</span>
               <span>{checkedCount} of {totalCount}</span>
             </div>
-            <div className="mt-2 h-[10px] rounded-full bg-[#1E293B] overflow-hidden">
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-[linear-gradient(90deg,#22C55E_0%,#4ADE80_100%)] shadow-[0_0_12px_rgba(34,197,94,0.4)] transition-all duration-200 ease-out"
+                className="h-full bg-success transition-all duration-200 ease-out"
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="mt-2 text-[12px] text-[#94A3B8]">
+            <div className="mt-2 text-sm text-muted-foreground">
               {checkedCount} of {totalCount} packed
             </div>
           </div>
         </header>
 
-        <main className="flex-1 flex flex-col">
+        <main className="flex flex-1 flex-col">
           <section className="mt-8">
             <div className="relative">
-              <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.12),transparent_70%)]" />
+              <div className="pointer-events-none absolute -inset-3 rounded-[28px] bg-accent/10" />
             {currentItem ? (
               <div
-                className={`relative w-full p-7 rounded-[20px] bg-[linear-gradient(145deg,#111827_0%,#0B1220_100%)] border border-[#1F2937] text-center transition-all duration-200 shadow-[0_20px_40px_rgba(0,0,0,0.5)] active:scale-[0.97] ${
+                className={`relative w-full rounded-[20px] border border-border bg-card p-7 text-center shadow-sm transition-all duration-200 active:scale-[0.97] ${
                   transitionState === 'exiting'
                     ? 'scale-[0.96] opacity-0 translate-y-2'
                     : transitionState === 'entering'
@@ -216,30 +216,42 @@ export function TodaysBag() {
                   role="checkbox"
                   aria-checked={checkboxIsFilled}
                   onClick={handleFocusCheck}
+                  aria-label={checkboxIsFilled ? `${currentItem.name} packed` : `Mark ${currentItem.name} as packed`}
                   className={`mx-auto w-9 h-9 rounded-[11px] border-2 flex items-center justify-center transition-all duration-120 ${
                     checkboxIsFilled
-                      ? 'bg-[#22C55E] border-[#22C55E] shadow-[0_0_0_5px_rgba(34,197,94,0.2),0_0_18px_rgba(34,197,94,0.35)]'
-                      : 'bg-transparent border-[#4B5563] hover:border-[#6B7280] hover:shadow-[0_0_0_4px_rgba(59,130,246,0.15)]'
+                      ? 'border-success bg-success'
+                      : 'bg-transparent border-border hover:border-muted-foreground hover:shadow-[0_0_0_4px_rgba(96,165,250,0.15)]'
                   }`}
                 >
-                  {checkboxIsFilled && <Check className="w-4 h-4 text-white" />}
+                  {checkboxIsFilled && <Check className="w-4 h-4 text-primary-foreground" />}
                 </button>
 
-                <p className="mt-[18px] text-[20px] leading-tight font-semibold text-white">{currentItem.name}</p>
-                <p className="mt-1.5 text-[13px] text-[#94A3B8]">{currentItem.subject ?? 'School Item'}</p>
+                <p className="mt-[18px] text-[20px] leading-tight font-semibold text-foreground">{currentItem.name}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{currentItem.subject ?? 'School Item'}</p>
               </div>
             ) : (
-              <div className="relative w-full p-7 rounded-[20px] bg-[linear-gradient(145deg,#111827_0%,#0B1220_100%)] border border-[#1F2937] text-center shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
-                <p className="text-[18px] font-semibold text-white">🎉 All Packed!</p>
-                <p className="mt-1 text-[13px] text-[#94A3B8]">You're ready for school</p>
+              <div className="relative w-full rounded-[20px] border border-border bg-card p-7 text-center shadow-sm">
+                <p className="text-[18px] font-semibold text-foreground">🎉 All Packed!</p>
+                <p className="mt-1 text-sm text-muted-foreground">You're ready for school</p>
               </div>
             )}
             </div>
 
+            {currentItem && (
+              <Button
+                type="button"
+                onClick={handleFocusCheck}
+                disabled={transitionState !== 'idle'}
+                className="mt-4 h-12 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Mark Packed
+              </Button>
+            )}
+
             {nextItem && (
               <div className="mt-6 text-center">
-                <p className="text-[11px] uppercase tracking-wide text-[#6B7280]">Up Next</p>
-                <p className="mt-1 text-[16px] font-medium text-[#E2E8F0]">{nextItem.name}</p>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">Up Next</p>
+                <p className="mt-1 text-[16px] font-medium text-foreground">{nextItem.name}</p>
               </div>
             )}
 
@@ -247,7 +259,7 @@ export function TodaysBag() {
               <button
                 type="button"
                 onClick={() => setShowAllItems(true)}
-                className="h-11 px-4 rounded-xl border border-[#1F2937] bg-[rgba(255,255,255,0.02)] hover:bg-[#162133] text-[13px] text-[#60A5FA] flex items-center gap-2 transition-colors"
+                className="h-10 rounded-lg px-4 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               >
                 <span>View All</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -255,14 +267,14 @@ export function TodaysBag() {
             </div>
 
             {doNotBringItems.length > 0 && (
-              <div className="mt-8 p-4 rounded-2xl border border-[rgba(239,68,68,0.15)] bg-[linear-gradient(145deg,rgba(239,68,68,0.08),rgba(239,68,68,0.02))]">
-                <p className="text-[14px] font-semibold text-[#F87171]">🚫 Skip These Today</p>
-                <p className="mt-1 text-[12px] text-[#FCA5A5]">Save weight: ~{estimatedSavedWeightKg} kg</p>
+              <div className="mt-8 rounded-2xl border border-warning/35 bg-warning/10 p-4">
+                <p className="text-sm font-semibold text-warning">Skip These Today</p>
+                <p className="mt-1 text-sm text-text-secondary">Save weight: ~{estimatedSavedWeightKg} kg</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {doNotBringItems.map(item => (
                     <span
                       key={item.id}
-                      className="px-2.5 py-1.5 rounded-full bg-[rgba(239,68,68,0.12)] text-[12px] text-[#FCA5A5]"
+                      className="rounded-full border border-warning/30 bg-surface px-2.5 py-1.5 text-xs text-text-secondary"
                     >
                       {item.name}
                     </span>
@@ -274,11 +286,11 @@ export function TodaysBag() {
 
           {isComplete && (
             <section className="mt-auto text-center pb-1 animate-[bounce_400ms_ease-out_1]">
-              <p className="text-[18px] font-semibold text-white">🎉 All Packed!</p>
-              <p className="mt-1 text-[13px] text-[#94A3B8]">You're ready for school</p>
+              <p className="text-[18px] font-semibold text-foreground">🎉 All Packed!</p>
+              <p className="mt-1 text-sm text-muted-foreground">You're ready for school</p>
               <Button
                 onClick={handleDonePacking}
-                className="mt-5 w-full h-[52px] rounded-[14px] bg-[linear-gradient(90deg,#3B82F6,#2563EB)] hover:brightness-110 text-[15px] font-semibold text-white shadow-[0_6px_20px_rgba(59,130,246,0.4)] transition-all duration-150 active:scale-[0.97]"
+                className="mt-5 h-[52px] w-full rounded-[14px] bg-primary text-[15px] font-semibold text-primary-foreground shadow-sm transition-all duration-150 hover:bg-primary/90 active:scale-[0.97]"
               >
                 Finish
               </Button>
@@ -289,16 +301,16 @@ export function TodaysBag() {
         </main>
 
         {showAllItems && (
-          <div className="fixed inset-0 z-20 bg-black/60 p-4 flex items-center justify-center">
-            <div className="w-full max-w-[360px] max-h-[80vh] overflow-y-auto rounded-2xl bg-[#111827] border border-[#1F2937] p-4">
+          <div className="fixed inset-0 z-20 flex items-center justify-center bg-foreground/40 p-4">
+            <div className="w-full max-w-md max-h-[80vh] overflow-y-auto rounded-2xl bg-card border border-border p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-white">Full Checklist</h2>
+                <h2 className="text-sm font-semibold text-foreground">Full Checklist</h2>
                 <button
                   type="button"
                   onClick={() => setShowAllItems(false)}
-                  className="w-7 h-7 rounded-full border border-[#374151] flex items-center justify-center"
+                  className="w-7 h-7 rounded-full border border-border flex items-center justify-center"
                 >
-                  <X className="w-4 h-4 text-[#9CA3AF]" />
+                  <X className="w-4 h-4 text-muted-foreground" />
                 </button>
               </div>
 
@@ -306,10 +318,10 @@ export function TodaysBag() {
                 {guidedItems.map(item => (
                   <div key={item.id} className="flex items-start justify-between gap-3 text-sm">
                     <div>
-                      <p className={`${item.checked ? 'text-[#6B7280] line-through' : 'text-white'}`}>{item.name}</p>
-                      {item.subject && <p className="text-xs text-[#9CA3AF] mt-0.5">{item.subject}</p>}
+                      <p className={`${item.checked ? 'text-muted-foreground line-through' : 'text-foreground'}`}>{item.name}</p>
+                      {item.subject && <p className="text-xs text-muted-foreground mt-0.5">{item.subject}</p>}
                     </div>
-                    <span className={`text-xs ${item.checked ? 'text-[#22C55E]' : 'text-[#9CA3AF]'}`}>
+                    <span className={`text-xs ${item.checked ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                       {item.checked ? 'Packed' : 'Pending'}
                     </span>
                   </div>
