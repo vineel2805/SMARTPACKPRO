@@ -405,35 +405,9 @@ export function UpdateItems() {
             <>
               <div className="my-4 h-px bg-[#E3E7EE]" />
 
-              <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-[16px] font-semibold text-[#1E2A44]">Selected Summary</h3>
-                <span className="text-[13px] font-semibold text-[#677489]">{items.length} items total</span>
-              </div>
+              
 
-              <div className="flex flex-wrap gap-2">
-                {items.map(item => {
-                  const chipClass = item.type === 'bring'
-                    ? 'border-[#BFE7CF] bg-[#EAF8F0] text-[#15803D]'
-                    : 'border-[#F4C4C4] bg-[#FDEEEE] text-[#DC2626]';
-
-                  return (
-                    <span
-                      key={item.id}
-                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[14px] font-medium ${chipClass}`}
-                    >
-                      {item.name}
-                      <button
-                        type="button"
-                        onClick={() => removeItem(item.id)}
-                        className="inline-flex h-5 w-5 items-center justify-center rounded-full"
-                        aria-label={`Remove ${item.name}`}
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
+              
             </>
           )}
 
