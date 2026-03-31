@@ -536,16 +536,21 @@ export function TodaysBag() {
         )}
 
         <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-[340px] rounded-2xl border border-[#CBD5E1] bg-white p-5 text-[#0F172A] shadow-[0_20px_48px_rgba(15,23,42,0.28)]">
             <AlertDialogHeader>
-              <AlertDialogTitle>Log out of Smart Pack?</AlertDialogTitle>
-              <AlertDialogDescription>
+              <AlertDialogTitle className="text-[28px] font-semibold leading-tight text-[#0F172A]">Log out of Smart Pack?</AlertDialogTitle>
+              <AlertDialogDescription className="text-[16px] leading-6 text-[#334155]">
                 You will need to sign in again to access your student dashboard.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
+            <AlertDialogFooter className="gap-2 sm:justify-end">
+              <AlertDialogCancel className="h-10 rounded-xl border border-[#CBD5E1] bg-white px-4 text-[#0F172A] hover:bg-[#F8FAFC]">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleLogout}
+                className="h-10 rounded-xl bg-[#E11D48] px-4 text-white hover:bg-[#BE123C]"
+              >
+                Log Out
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

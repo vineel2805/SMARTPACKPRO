@@ -1,6 +1,5 @@
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Button } from '../ui/button';
 import { ArrowLeft, Sun, Moon, Monitor, LogOut, User as UserIcon } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 
@@ -21,85 +20,77 @@ export function StudentProfile() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
-        <div className="max-w-md mx-auto flex items-center gap-3">
-          <Link to="/student">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44] pb-20" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <header className="sticky top-0 z-10 border-b border-[#E1E6EF] bg-white/90 px-4 py-4 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <Link
+            to="/student"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D9DEE8] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+          >
+            <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="font-semibold">Profile</h1>
+          <h1 className="text-[20px] font-semibold">Profile</h1>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* User Info */}
-        <section className="bg-card rounded-xl border border-border p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
-              <UserIcon className="w-8 h-8 text-white" />
+      <main className="mx-auto w-full max-w-md space-y-4 px-4 py-5">
+        <section className="rounded-3xl bg-white p-5 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-white">
+              <UserIcon className="h-8 w-8" />
             </div>
             <div>
-              <h2 className="font-semibold text-lg">{user?.name}</h2>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <h2 className="text-[18px] font-semibold">{user?.name}</h2>
+              <p className="text-[13px] text-[#677489]">{user?.email}</p>
             </div>
           </div>
-          
-          <div className="space-y-2 pt-4 border-t border-border">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Class</span>
+
+          <div className="space-y-2 border-t border-[#E3E7EE] pt-3 text-[14px]">
+            <div className="flex items-center justify-between">
+              <span className="text-[#677489]">Class</span>
               <span className="font-medium">{user?.class}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">School</span>
+            <div className="flex items-center justify-between">
+              <span className="text-[#677489]">School</span>
               <span className="font-medium">{user?.school}</span>
             </div>
           </div>
         </section>
 
-        {/* Appearance */}
-        <section>
-          <h3 className="font-semibold mb-3">Appearance</h3>
-          <div className="bg-card rounded-xl border border-border overflow-hidden">
-            {themeOptions.map((option, index) => {
+        <section className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <h3 className="mb-3 text-[16px] font-semibold">Appearance</h3>
+          <div className="space-y-2">
+            {themeOptions.map(option => {
               const Icon = option.icon;
               const isSelected = theme === option.value;
-              
               return (
                 <button
                   key={option.value}
                   onClick={() => setTheme(option.value)}
-                  className={`w-full flex items-center justify-between p-4 transition-colors ${
-                    index !== themeOptions.length - 1 ? 'border-b border-border' : ''
-                  } ${isSelected ? 'bg-indigo-500/10' : 'hover:bg-secondary/50'}`}
+                  className={`flex h-11 w-full items-center justify-between rounded-xl border px-3 text-[14px] ${
+                    isSelected
+                      ? 'border-[#5B5FF2] bg-[#E9ECFF] text-[#4F46E5]'
+                      : 'border-[#DCE2EC] bg-white text-[#2F3B52]'
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-5 h-5 ${isSelected ? 'text-indigo-400' : 'text-muted-foreground'}`} />
-                    <span className={isSelected ? 'text-foreground' : 'text-foreground/80'}>
-                      {option.label}
-                    </span>
-                  </div>
-                  {isSelected && (
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                  )}
+                  <span className="inline-flex items-center gap-2">
+                    <Icon className="h-4.5 w-4.5" />
+                    {option.label}
+                  </span>
+                  {isSelected && <span className="text-[12px] font-semibold">Selected</span>}
                 </button>
               );
             })}
           </div>
         </section>
 
-        {/* Logout */}
-        <section>
-          <Button
-            onClick={handleLogout}
-            variant="outline"
-            className="w-full justify-start gap-3 border-border hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400"
-          >
-            <LogOut className="w-5 h-5" />
-            Logout
-          </Button>
-        </section>
+        <button
+          onClick={handleLogout}
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#F4C4C4] bg-[#FDEEEE] text-[14px] font-semibold text-[#DC2626]"
+        >
+          <LogOut className="h-4.5 w-4.5" />
+          Logout
+        </button>
       </main>
     </div>
   );

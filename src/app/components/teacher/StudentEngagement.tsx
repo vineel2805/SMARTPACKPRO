@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CheckCircle2, Clock, Eye, AlertCircle, Bell } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock, AlertCircle, Bell } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { getStudentEngagementByClass } from '../../services/firestoreService';
 import type { StudentEngagement as StudentEngagementItem } from '../../types/models';
 
-type StatusFilter = 'all' | 'completed' | 'in-progress' | 'seen' | 'not-seen' | 'inactive';
+type StatusFilter = 'all' | 'completed' | 'in-progress' | 'not-seen' | 'inactive';
 
 export function StudentEngagement() {
   const { user } = useAuth();
@@ -39,47 +38,11 @@ export function StudentEngagement() {
   }, [selectedClass]);
 
   const statusConfig = {
-    completed: {
-      icon: CheckCircle2,
-      color: 'text-green-500',
-      bg: 'bg-green-500/10',
-      border: 'border-green-500/20',
-      label: 'Completed',
-      description: 'Finished packing',
-    },
-    'in-progress': {
-      icon: Clock,
-      color: 'text-yellow-500',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/20',
-      label: 'In Progress',
-      description: 'Currently packing',
-    },
-    seen: {
-      icon: Eye,
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10',
-      border: 'border-blue-500/20',
-      label: 'Seen',
-      description: 'Opened app',
-    },
-    'not-seen': {
-      icon: AlertCircle,
-      color: 'text-muted-foreground',
-      bg: 'bg-muted',
-      border: 'border-border',
-      label: 'Not Seen',
-      description: 'Hasn\'t opened app',
-    },
-    inactive: {
-      icon: AlertCircle,
-      color: 'text-red-400',
-      bg: 'bg-red-500/10',
-      border: 'border-red-500/20',
-      label: 'Inactive',
-      description: 'No recent activity',
-    },
-  };
+    completed: { icon: CheckCircle2, badge: 'bg-[#EAF8F0] text-[#15803D] border-[#BFE7CF]', label: 'Completed' },
+    'in-progress': { icon: Clock, badge: 'bg-[#FFF7E8] text-[#D97706] border-[#F8D29C]', label: 'In Progress' },
+    'not-seen': { icon: AlertCircle, badge: 'bg-[#EEF1F6] text-[#667085] border-[#D8DEE9]', label: 'Not Seen' },
+    inactive: { icon: AlertCircle, badge: 'bg-[#FDEEEE] text-[#DC2626] border-[#F4C4C4]', label: 'Inactive' },
+  } as const;
 
   const filteredStudents = useMemo(
     () => (filter === 'all' ? students : students.filter(s => s.status === filter)),
@@ -90,7 +53,6 @@ export function StudentEngagement() {
     () => ({
       completed: students.filter(s => s.status === 'completed').length,
       'in-progress': students.filter(s => s.status === 'in-progress').length,
-      seen: students.filter(s => s.status === 'seen').length,
       'not-seen': students.filter(s => s.status === 'not-seen').length,
       inactive: students.filter(s => s.status === 'inactive').length,
     }),
@@ -100,155 +62,122 @@ export function StudentEngagement() {
   const handleRemindStudents = () => {
     const count = students.filter(s => s.status === 'not-seen' || s.status === 'inactive').length;
     if (count === 0) {
-      toast.success('All students are engaged!', {
-        description: 'No reminders needed',
-      });
+      toast.success('All students are engaged!');
       return;
     }
-    toast.success(`Reminder sent to ${count} students`, {
-      description: 'Students will be notified to check their packing list',
-    });
+    toast.success(`Reminder sent to ${count} students`);
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
-        <div className="max-w-md mx-auto flex items-center gap-3">
-          <Link to="/teacher">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44] pb-20" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <header className="sticky top-0 z-10 border-b border-[#E1E6EF] bg-white/90 px-4 py-4 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <Link
+            to="/teacher"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D9DEE8] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+          >
+            <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div className="flex-1">
-            <h1 className="font-semibold">Student Engagement</h1>
-            <p className="text-xs text-muted-foreground">Class {selectedClass || 'N/A'}</p>
+          <div>
+            <h1 className="text-[20px] font-semibold">Student Engagement</h1>
+            <p className="text-[13px] text-[#677489]">Class {selectedClass || 'N/A'}</p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 py-6 space-y-6">
-        <section>
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            {(user?.assignedClasses ?? []).map(cls => (
-              <button
-                key={cls}
-                onClick={() => setSelectedClass(cls)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  selectedClass === cls
-                    ? 'bg-indigo-500 text-foreground'
-                    : 'bg-muted text-muted-foreground border border-border'
-                }`}
-              >
-                {cls}
-              </button>
-            ))}
-          </div>
-        </section>
+      <main className="mx-auto w-full max-w-md space-y-4 px-4 py-5">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {(user?.assignedClasses ?? []).map(cls => (
+            <button
+              key={cls}
+              onClick={() => setSelectedClass(cls)}
+              className={`h-10 whitespace-nowrap rounded-full border px-4 text-[13px] font-medium ${
+                selectedClass === cls
+                  ? 'border-transparent bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-white'
+                  : 'border-[#C8CEDB] bg-white text-[#2F3B52]'
+              }`}
+            >
+              {cls}
+            </button>
+          ))}
+        </div>
 
-        {/* Quick Stats */}
-        <section className="grid grid-cols-4 gap-2">
+        <section className="grid grid-cols-5 gap-2">
           {Object.entries(statusConfig).map(([key, config]) => {
             const Icon = config.icon;
             const count = stats[key as keyof typeof stats];
-            const isActive = filter === key;
-
+            const active = filter === key;
             return (
               <button
                 key={key}
                 onClick={() => setFilter(key as StatusFilter)}
-                className={`p-3 rounded-lg border transition-colors ${
-                  isActive
-                    ? `${config.bg} ${config.border}`
-                    : 'bg-card border-border hover:border-border/80'
-                }`}
+                className={`rounded-2xl border bg-white p-2 text-left ${active ? 'border-[#5B5FF2]' : 'border-[#DCE2EC]'}`}
               >
-                <Icon className={`w-4 h-4 ${config.color} mb-1`} />
-                <p className="text-xl font-semibold">{count}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{config.label}</p>
+                <Icon className="mb-1 h-4 w-4 text-[#5B5FF2]" />
+                <p className="text-[16px] font-semibold">{count}</p>
+                <p className="text-[10px] text-[#677489]">{config.label}</p>
               </button>
             );
           })}
         </section>
 
-        {/* Filter Chips */}
-        <section>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                filter === 'all'
-                  ? 'bg-indigo-500 text-foreground'
-                  : 'bg-card text-muted-foreground border border-border'
-              }`}
-            >
-              All ({students.length})
-            </button>
-            {Object.entries(statusConfig).map(([key, config]) => {
-              const count = stats[key as keyof typeof stats];
-              return (
-                <button
-                  key={key}
-                  onClick={() => setFilter(key as StatusFilter)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    filter === key
-                      ? 'bg-indigo-500 text-foreground'
-                      : 'bg-card text-muted-foreground border border-border'
-                  }`}
-                >
-                  {config.label} ({count})
-                </button>
-              );
-            })}
-          </div>
-        </section>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          <button
+            onClick={() => setFilter('all')}
+            className={`h-9 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium ${
+              filter === 'all' ? 'border-[#5B5FF2] bg-[#E9ECFF] text-[#4F46E5]' : 'border-[#DCE2EC] bg-white text-[#2F3B52]'
+            }`}
+          >
+            All ({students.length})
+          </button>
+          {Object.entries(statusConfig).map(([key, config]) => {
+            const count = stats[key as keyof typeof stats];
+            return (
+              <button
+                key={key}
+                onClick={() => setFilter(key as StatusFilter)}
+                className={`h-9 whitespace-nowrap rounded-full border px-3 text-[12px] font-medium ${
+                  filter === key ? 'border-[#5B5FF2] bg-[#E9ECFF] text-[#4F46E5]' : 'border-[#DCE2EC] bg-white text-[#2F3B52]'
+                }`}
+              >
+                {config.label} ({count})
+              </button>
+            );
+          })}
+        </div>
 
-        {/* Student List */}
         <section className="space-y-2">
-          {isLoading && <p className="text-sm text-muted-foreground">Loading engagement...</p>}
-          {!isLoading && filteredStudents.length === 0 && (
-            <p className="text-sm text-muted-foreground">No engagement records found for this class.</p>
-          )}
+          {isLoading && <p className="text-[13px] text-[#677489]">Loading engagement...</p>}
+          {!isLoading && filteredStudents.length === 0 && <p className="text-[13px] text-[#677489]">No engagement records found.</p>}
 
           {filteredStudents.map(student => {
             const config = statusConfig[student.status];
             const Icon = config.icon;
-
             return (
-              <div
-                key={student.id}
-                className={`p-4 rounded-lg border ${
-                  student.status === 'inactive' ? 'bg-red-500/5 border-red-500/20' : 'bg-card border-border'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{student.class}</p>
+              <div key={student.id} className="rounded-2xl bg-white p-3 shadow-[0_4px_14px_rgba(15,23,42,0.06)]">
+                <div className="mb-1 flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-[14px] font-semibold">{student.name}</p>
+                    <p className="text-[12px] text-[#677489]">{student.class}</p>
                   </div>
-                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${config.bg} ${config.border} border`}>
-                    <Icon className={`w-3 h-3 ${config.color}`} />
-                    <span className={config.color}>{config.label}</span>
-                  </div>
+                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${config.badge}`}>
+                    <Icon className="h-3 w-3" />
+                    {config.label}
+                  </span>
                 </div>
-                <p className="text-xs text-muted-foreground mb-2">{config.description}</p>
-                {student.lastSeen && (
-                  <p className="text-xs text-muted-foreground">Last seen: {student.lastSeen}</p>
-                )}
+                {student.lastSeen && <p className="text-[12px] text-[#677489]">Last seen: {student.lastSeen}</p>}
               </div>
             );
           })}
         </section>
 
-        {/* Remind Button */}
-        <section>
-          <Button
-            onClick={handleRemindStudents}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 gap-2"
-          >
-            <Bell className="w-4 h-4" />
-            Remind Students
-          </Button>
-        </section>
+        <button
+          onClick={handleRemindStudents}
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-[14px] font-semibold text-white"
+        >
+          <Bell className="h-4.5 w-4.5" />
+          Remind Students
+        </button>
       </main>
     </div>
   );

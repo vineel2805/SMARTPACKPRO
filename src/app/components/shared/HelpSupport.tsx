@@ -1,6 +1,5 @@
 import { ArrowLeft, Mail, MessageCircle, AlertCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
-import { Button } from '../ui/button';
+import { useNavigate } from 'react-router';
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -15,6 +14,7 @@ export function HelpSupport() {
       toast.error('Please describe your issue');
       return;
     }
+
     toast.success('Issue reported successfully', {
       description: 'Our team will get back to you soon.',
     });
@@ -24,19 +24,19 @@ export function HelpSupport() {
   const faqs = [
     {
       question: 'How do I add custom items to my packing list?',
-      answer: 'Students can add custom items in the "My Items" section on the Today\'s Bag screen.',
+      answer: 'Students can add custom items in the My Items section on the Today\'s Bag screen.',
     },
     {
       question: 'How do teachers update packing items?',
-      answer: 'Teachers can use the Update screen to select a class and add items to bring or not bring.',
+      answer: 'Teachers can use Update screen to select class and add bring or do not bring items.',
     },
     {
       question: 'Can I see which students have completed packing?',
-      answer: 'Yes, teachers can view student engagement in the Student Engagement screen.',
+      answer: 'Yes, teachers can view student engagement from Student Engagement screen.',
     },
     {
       question: 'How do I change the theme?',
-      answer: 'Go to Profile → Appearance and select Light, Dark, or System theme.',
+      answer: 'Go to Profile and select Light, Dark, or System theme mode.',
     },
   ];
 
@@ -54,110 +54,80 @@ export function HelpSupport() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
-        <div className="max-w-md mx-auto flex items-center gap-3">
-          <Button
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44] pb-20" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <header className="sticky top-0 z-10 border-b border-[#E1E6EF] bg-white/90 px-4 py-4 backdrop-blur-sm">
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <button
             onClick={() => navigate(getBackPath())}
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D9DEE8] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h1 className="font-semibold">Help & Support</h1>
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="text-[20px] font-semibold">Help & Support</h1>
         </div>
       </header>
 
-      <main className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {/* Contact Options */}
-        <section>
-          <h3 className="font-semibold mb-3">Contact Us</h3>
+      <main className="mx-auto w-full max-w-md space-y-4 px-4 py-5">
+        <section className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <h3 className="mb-3 text-[16px] font-semibold">Contact</h3>
           <div className="space-y-2">
             <a
               href="mailto:support@smartpackapp.com"
-              className="flex items-center gap-3 p-4 bg-card rounded-lg border border-border hover:border-border/80 transition-colors"
+              className="flex items-center gap-3 rounded-2xl border border-[#DCE2EC] bg-white p-3"
             >
-              <div className="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
-                <Mail className="w-5 h-5 text-indigo-400" />
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#E8EBFF] text-[#5B5FF2]">
+                <Mail className="h-5 w-5" />
               </div>
-              <div className="flex-1">
-                <p className="font-medium">Email Support</p>
-                <p className="text-sm text-muted-foreground">support@smartpackapp.com</p>
+              <div>
+                <p className="text-[14px] font-semibold">Email Support</p>
+                <p className="text-[13px] text-[#677489]">support@smartpackapp.com</p>
               </div>
             </a>
 
-            <button className="w-full flex items-center gap-3 p-4 bg-card rounded-lg border border-border hover:border-border/80 transition-colors">
-              <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-green-400" />
+            <button className="flex w-full items-center gap-3 rounded-2xl border border-[#DCE2EC] bg-white p-3 text-left">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#E7F8EF] text-[#16A34A]">
+                <MessageCircle className="h-5 w-5" />
               </div>
-              <div className="flex-1 text-left">
-                <p className="font-medium">Live Chat</p>
-                <p className="text-sm text-muted-foreground">Available Mon-Fri, 9 AM - 5 PM</p>
+              <div>
+                <p className="text-[14px] font-semibold">Live Chat</p>
+                <p className="text-[13px] text-[#677489]">Mon-Fri, 9 AM - 5 PM</p>
               </div>
             </button>
           </div>
         </section>
 
-        {/* FAQs */}
-        <section>
-          <h3 className="font-semibold mb-3">Frequently Asked Questions</h3>
-          <div className="space-y-3">
+        <section className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <h3 className="mb-3 text-[16px] font-semibold">Frequently Asked Questions</h3>
+          <div className="space-y-2">
             {faqs.map((faq, index) => (
-              <details
-                key={index}
-                className="bg-card rounded-lg border border-border overflow-hidden group"
-              >
-                <summary className="p-4 cursor-pointer hover:bg-zinc-800/50 transition-colors list-none flex items-center justify-between">
-                  <span className="font-medium pr-4">{faq.question}</span>
-                  <svg
-                    className="w-5 h-5 text-muted-foreground transition-transform group-open:rotate-180"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </summary>
-                <div className="px-4 pb-4 text-sm text-muted-foreground border-t border-border pt-3">
-                  {faq.answer}
-                </div>
+              <details key={index} className="rounded-2xl border border-[#DCE2EC] bg-white px-3 py-2">
+                <summary className="cursor-pointer list-none text-[14px] font-medium text-[#2F3B52]">{faq.question}</summary>
+                <p className="mt-2 text-[13px] text-[#677489]">{faq.answer}</p>
               </details>
             ))}
           </div>
         </section>
 
-        {/* Report Issue */}
-        <section>
-          <h3 className="font-semibold mb-3">Report an Issue</h3>
-          <div className="bg-card rounded-xl border border-border p-4 space-y-4">
-            <div className="flex items-start gap-3 p-3 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
-              <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
-              <p className="text-sm text-foreground">
-                Please describe your issue in detail. Our team will review and respond within 24 hours.
-              </p>
-            </div>
-
-            <textarea
-              value={issueDescription}
-              onChange={e => setIssueDescription(e.target.value)}
-              placeholder="Describe the issue you're facing..."
-              className="w-full h-32 px-4 py-3 bg-muted border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors resize-none text-foreground"
-            />
-
-            <Button
-              onClick={handleSubmit}
-              className="w-full bg-indigo-500 hover:bg-indigo-600"
-            >
-              Submit Issue
-            </Button>
+        <section className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <h3 className="mb-3 text-[16px] font-semibold">Report an Issue</h3>
+          <div className="mb-3 flex items-start gap-2 rounded-2xl border border-[#F8DBA6] bg-[#FFF7E6] p-3">
+            <AlertCircle className="mt-0.5 h-4.5 w-4.5 text-[#D97706]" />
+            <p className="text-[13px] text-[#6B4E10]">Describe your issue and our team will respond within 24 hours.</p>
           </div>
-        </section>
 
-        {/* App Info */}
-        <section className="text-center pt-4">
-          <p className="text-sm text-muted-foreground">Smart Pack App v1.0.0</p>
-          <p className="text-xs text-muted-foreground/70 mt-1">© 2026 Smart Pack App. All rights reserved.</p>
+          <textarea
+            value={issueDescription}
+            onChange={e => setIssueDescription(e.target.value)}
+            placeholder="Describe the issue you're facing..."
+            className="h-28 w-full resize-none rounded-xl border border-[#C8CEDB] bg-white px-3 py-2.5 text-[14px] outline-none placeholder:text-[#8A94A8] focus:border-[#5B5FF2]"
+          />
+
+          <button
+            onClick={handleSubmit}
+            className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-[14px] font-semibold text-white"
+          >
+            Submit Issue
+          </button>
         </section>
       </main>
     </div>

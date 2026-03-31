@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
-import { Button } from '../ui/button';
 import {
   Select,
   SelectContent,
@@ -9,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { getClasses, getChecklistAuditData } from '../../services/firestoreService';
 import { toast } from 'sonner';
 
@@ -31,7 +29,6 @@ export function ChecklistAudit() {
   const [auditData, setAuditData] = useState<AuditItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Get today's date in YYYY-MM-DD format
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
@@ -58,8 +55,7 @@ export function ChecklistAudit() {
       try {
         const data = await getChecklistAuditData(selectedClass, today);
         setAuditData(data);
-      } catch (error) {
-        console.error(error);
+      } catch {
         toast.error('Failed to load audit data');
         setAuditData([]);
       } finally {
@@ -68,197 +64,135 @@ export function ChecklistAudit() {
     }
 
     loadAuditData();
-  }, [selectedClass]);
+  }, [selectedClass, today]);
 
   if (!selectedClass && classes.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background">
-        <p className="text-muted-foreground">No classes found</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#F3F5F9] text-[#677489]" style={{ fontFamily: 'Inter, sans-serif' }}>
+        No classes found
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-64 border-r border-zinc-800 min-h-screen">
-          <div className="p-6">
-            <h1 className="text-xl font-semibold">Smart Pack App</h1>
-            <p className="text-sm text-muted-foreground mt-1">Admin Panel</p>
-          </div>
-          <nav className="px-3 space-y-1">
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
+        <header className="mb-5 rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-[#667085]">Admin Panel</p>
+              <h1 className="text-[24px] font-semibold">Checklist Audit</h1>
+              <p className="mt-1 text-[14px] text-[#677489]">See which updates won for each checklist item</p>
+            </div>
             <Link
               to="/admin"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300"
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-[#DCE2EC] bg-white px-4 text-[13px] font-semibold text-[#2F3B52]"
             >
-              Dashboard
+              Back to Dashboard
             </Link>
-            <Link
-              to="/admin/teachers"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300"
-            >
-              Teachers
-            </Link>
-            <Link
-              to="/admin/checklist-audit"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-500/10 text-indigo-400"
-            >
-              Checklist Audit
-            </Link>
-          </nav>
-        </aside>
+          </div>
+        </header>
 
-        {/* Main Content */}
-        <main className="flex-1">
-          <div className="p-8">
-            {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold">Checklist Audit</h2>
-              <p className="text-muted-foreground mt-2">View which teacher updates won for today's checklist</p>
-            </div>
+        <section className="mb-5 rounded-3xl bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:p-5">
+          <p className="mb-2 text-[13px] font-semibold text-[#677489]">Select Class</p>
+          <Select value={selectedClass} onValueChange={setSelectedClass}>
+            <SelectTrigger className="h-11 rounded-xl border-[#DCE2EC] bg-white text-[#2F3B52]">
+              <SelectValue placeholder="Select a class" />
+            </SelectTrigger>
+            <SelectContent className="border-[#DCE2EC] bg-white">
+              {classes.map(className => (
+                <SelectItem key={className} value={className}>
+                  {className}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </section>
 
-            {/* Class Selector */}
-            <Card className="mb-6 border-border bg-card">
-              <CardHeader>
-                <CardTitle className="text-foreground">Select Class</CardTitle>
-                <CardDescription>Choose a class to view checklist resolution details</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Select value={selectedClass} onValueChange={setSelectedClass}>
-                  <SelectTrigger className="w-full bg-muted border-border text-foreground">
-                    <SelectValue placeholder="Select a class" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-800 border-zinc-700">
-                    {classes.map(className => (
-                      <SelectItem key={className} value={className} className="text-foreground">
-                        {className}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
+        <section className="rounded-3xl bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:p-5">
+          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-[18px] font-semibold">{selectedClass} - {today}</h2>
+            <p className="text-[13px] text-[#677489]">
+              {auditData.length === 0 && !loading ? 'No updates today' : `${auditData.length} final checklist items`}
+            </p>
+          </div>
 
-            {/* Audit Results */}
-            <Card className="border-border bg-card">
-              <CardHeader>
-                <CardTitle className="text-white">
-                  {selectedClass} - {today}
-                </CardTitle>
-                <CardDescription>
-                  {auditData.length === 0 && !loading
-                    ? 'No updates for this class today'
-                    : `${auditData.length} items in final checklist`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Loading...</p>
+          {loading ? (
+            <p className="py-8 text-center text-[13px] text-[#677489]">Loading...</p>
+          ) : auditData.length === 0 ? (
+            <p className="py-8 text-center text-[13px] text-[#677489]">No updates found for this class today</p>
+          ) : (
+            <div className="space-y-3">
+              {auditData.map((item, idx) => (
+                <div key={`${item.name}-${idx}`} className="rounded-2xl border border-[#E3E7EE] bg-[#F8FAFC] p-4">
+                  <div className="mb-3 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-[15px] font-semibold text-[#2F3B52]">{item.name}</p>
+                      <p className="text-[12px] text-[#677489]">
+                        Type:{' '}
+                        <span className={item.type === 'bring' ? 'font-semibold text-[#15803D]' : 'font-semibold text-[#DC2626]'}>
+                          {item.type === 'bring' ? 'Bring' : 'Do Not Bring'}
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                ) : auditData.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No updates found for this class today</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {auditData.map((item, idx) => (
-                      <div
-                        key={`${item.name}-${idx}`}
-                        className="border border-zinc-800 rounded-lg p-4 bg-zinc-800/30"
-                      >
-                        {/* Item Header */}
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <p className="font-semibold text-foreground">{item.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Type:{' '}
-                              <span
-                                className={
-                                  item.type === 'bring'
-                                    ? 'text-green-400'
-                                    : 'text-red-400'
-                                }
-                              >
-                                {item.type === 'bring' ? 'Bring' : 'Do Not Bring'}
-                              </span>
-                            </p>
+
+                  {item.sources.length > 0 && (
+                    <div className="space-y-2 border-t border-[#E3E7EE] pt-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-[#677489]">
+                        Update Sources ({item.sources.length})
+                      </p>
+
+                      {item.sources.map((source, sourceIdx) => (
+                        <div
+                          key={sourceIdx}
+                          className={`rounded-xl border p-2.5 ${
+                            source.won ? 'border-[#BFE7CF] bg-[#EAF8F0]' : 'border-[#DCE2EC] bg-white'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[13px] font-semibold text-[#2F3B52]">{source.teacherName}</p>
+                              <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px]">
+                                <span
+                                  className={`rounded-full px-2 py-0.5 font-semibold ${
+                                    source.teacherRoleType === 'class-teacher'
+                                      ? 'bg-[#E9ECFF] text-[#4F46E5]'
+                                      : 'bg-[#FFF7E9] text-[#B45309]'
+                                  }`}
+                                >
+                                  {source.teacherRoleType === 'class-teacher'
+                                    ? 'Class Teacher'
+                                    : `Subject Teacher (${source.teacherSubject})`}
+                                </span>
+                                <span className="text-[#677489]">Priority {source.priority}</span>
+                              </div>
+                            </div>
+
+                            {source.won && (
+                              <div className="inline-flex items-center gap-1 rounded-full border border-[#BFE7CF] bg-white px-2 py-1 text-[11px] font-semibold text-[#15803D]">
+                                <ChevronRight className="h-3.5 w-3.5" />
+                                Winner
+                              </div>
+                            )}
                           </div>
                         </div>
-
-                        {/* Sources/Conflicts */}
-                        {item.sources.length > 0 && (
-                          <div className="space-y-2 pt-3 border-t border-zinc-700">
-                            <p className="text-xs text-muted-foreground/70 uppercase tracking-wider">
-                              Update Sources ({item.sources.length})
-                            </p>
-                            {item.sources.map((source, sourceIdx) => (
-                              <div
-                                key={sourceIdx}
-                                className={`flex items-center justify-between p-2 rounded text-sm ${
-                                  source.won
-                                    ? 'bg-green-500/15 border border-green-500/30'
-                                    : 'bg-zinc-700/20 border border-zinc-700/30'
-                                }`}
-                              >
-                                <div className="flex-1">
-                                  <p className="text-foreground">
-                                    {source.teacherName}
-                                    <span
-                                      className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                                        source.teacherRoleType === 'class-teacher'
-                                          ? 'bg-indigo-500/30 text-indigo-300'
-                                          : 'bg-amber-500/30 text-amber-300'
-                                      }`}
-                                    >
-                                      {source.teacherRoleType === 'class-teacher'
-                                        ? 'Class Teacher'
-                                        : `Subject Teacher (${source.teacherSubject})`}
-                                    </span>
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    Priority: {source.priority}
-                                  </p>
-                                </div>
-                                {source.won && (
-                                  <div className="flex items-center gap-1 text-green-400 font-semibold text-xs">
-                                    <ChevronRight className="w-4 h-4" />
-                                    WINNER
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Info Box */}
-            <Card className="mt-6 border-border bg-card/50">
-              <CardContent className="pt-6">
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>
-                    <span className="text-indigo-400 font-semibold">Class Teachers</span> have{' '}
-                    <span className="font-semibold">priority 2</span> and override subject teachers.
-                  </p>
-                  <p>
-                    <span className="text-amber-400 font-semibold">Subject Teachers</span> have{' '}
-                    <span className="font-semibold">priority 1</span> and are shown for reference.
-                  </p>
-                  <p className="mt-3">
-                    When multiple teachers update the same item for the same class on the same day, the
-                    higher priority update wins and appears in the final checklist.
-                  </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className="mt-5 rounded-2xl border border-[#F8D7A7] bg-[#FFF7E9] p-4">
+          <p className="mb-1 inline-flex items-center gap-1 text-[13px] font-semibold text-[#B45309]">
+            <AlertTriangle className="h-4 w-4" />
+            Resolution Rules
+          </p>
+          <p className="text-[13px] text-[#8A5A15]">Class teachers have priority 2 and override subject teachers (priority 1) on conflicts.</p>
+        </section>
       </div>
     </div>
   );

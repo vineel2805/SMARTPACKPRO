@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { useAuth, UserRole } from '../../context/AuthContext';
-import { Button } from '../ui/button';
-import { GraduationCap, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth, UserRole } from '../../context/AuthContext';
 import { loginWithSchoolCredentials } from '../../services/firestoreService';
 
 export function Login() {
@@ -55,67 +54,71 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-6">
-        <button onClick={() => navigate('/')} className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to schools
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-4 py-8">
+        <button
+          onClick={() => navigate('/')}
+          className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#D9DEE8] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+          aria-label="Back"
+        >
+          <ArrowLeft className="h-5 w-5" />
         </button>
 
-        <div className="text-center space-y-2">
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-indigo-500 to-purple-500 rounded-3xl flex items-center justify-center">
-            <GraduationCap className="w-10 h-10 text-white" />
+        <div className="mb-5 text-center">
+          <div className="mx-auto mb-3 inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] shadow-[0_14px_28px_rgba(79,70,229,0.25)]">
+            <GraduationCap className="h-10 w-10 text-white" />
           </div>
-          <h1 className="text-3xl font-semibold">Smart Pack App</h1>
-          <p className="text-muted-foreground">{schoolName || 'Select school to continue'}</p>
+          <h1 className="text-[28px] font-semibold leading-8">Smart Pack App</h1>
+          <p className="mt-1 text-[14px] text-[#677489]">{schoolName || 'Select school to continue'}</p>
         </div>
 
-        <div className="space-y-3 bg-card border border-border rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Login with your school credentials</p>
+        <div className="rounded-3xl bg-white p-4 shadow-[0_10px_26px_rgba(15,23,42,0.08)]">
+          <p className="mb-3 text-[13px] text-[#677489]">Login with your school credentials</p>
 
-          <div className="space-y-2">
-            <label className="text-sm">Role</label>
-            <select
-              value={role}
-              onChange={e => setRole(e.target.value as UserRole)}
-              className="w-full h-10 px-3 bg-background border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors"
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-[#41506A]">Role</label>
+              <select
+                value={role}
+                onChange={e => setRole(e.target.value as UserRole)}
+                className="h-12 w-full rounded-xl border border-[#C8CEDB] bg-white px-3 text-[14px] outline-none focus:border-[#5B5FF2]"
+              >
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-[#41506A]">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="h-12 w-full rounded-xl border border-[#C8CEDB] bg-white px-3 text-[14px] outline-none placeholder:text-[#8A94A8] focus:border-[#5B5FF2]"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-[13px] font-medium text-[#41506A]">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="h-12 w-full rounded-xl border border-[#C8CEDB] bg-white px-3 text-[14px] outline-none placeholder:text-[#8A94A8] focus:border-[#5B5FF2]"
+              />
+            </div>
+
+            <button
+              onClick={handleLogin}
+              disabled={isLoggingIn}
+              className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(79,70,229,0.28)] disabled:opacity-60"
             >
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
-            </select>
+              {isLoggingIn ? 'Signing in...' : 'Login'}
+            </button>
           </div>
-
-          <div className="space-y-2">
-            <label className="text-sm">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full h-10 px-3 bg-background border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="w-full h-10 px-3 bg-background border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <Button onClick={handleLogin} disabled={isLoggingIn} className="w-full">
-            {isLoggingIn ? 'Signing in...' : 'Login'}
-          </Button>
-        </div>
-
-        <div className="text-center text-xs text-muted-foreground/60">
-          <p>{isLoggingIn ? `Signing in as ${role}...` : 'Connected to Firebase backend'}</p>
-          <p className="mt-1">© 2026 Smart Pack App</p>
         </div>
       </div>
     </div>

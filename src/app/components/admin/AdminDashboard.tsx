@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Users, School, AlertTriangle, Settings } from 'lucide-react';
+import { AlertTriangle, School, Settings, Users } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
@@ -20,7 +20,7 @@ export function AdminDashboard() {
         const [teacherData, classData, historyData] = await Promise.all([
           getTeachers(),
           getClasses(),
-          getRecentHistory(3),
+          getRecentHistory(4),
         ]);
         setTeachers(teacherData);
         setClasses(classData);
@@ -39,152 +39,95 @@ export function AdminDashboard() {
   const unassignedClasses = Math.max(0, totalClasses - classTeachers);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="hidden md:block w-64 border-r border-border min-h-screen bg-card">
-          <div className="p-6">
-            <h1 className="text-xl font-semibold text-foreground">Smart Pack App</h1>
-            <p className="text-sm text-muted-foreground mt-1">Admin Panel</p>
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
+        <header className="mb-5 rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-[#667085]">Admin Panel</p>
+              <h1 className="text-[24px] font-semibold">School Dashboard</h1>
+              <p className="mt-1 text-[14px] text-[#677489]">Overview of teachers, classes, and daily activity</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/admin/teachers"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-[#DCE2EC] bg-white px-4 text-[13px] font-semibold text-[#2F3B52]"
+              >
+                Manage Teachers
+              </Link>
+              <Button
+                onClick={() => setShowKeywordSettings(true)}
+                className="h-10 rounded-xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] px-4 text-[13px] font-semibold text-white"
+              >
+                <Settings className="mr-2 h-4 w-4" />
+                Subject Keywords
+              </Button>
+            </div>
           </div>
-          <nav className="px-3 space-y-1">
-            <Link
-              to="/admin"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary"
-            >
-              <School className="w-5 h-5" />
-              Dashboard
-            </Link>
-            <Link
-              to="/admin/teachers"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
-            >
-              <Users className="w-5 h-5" />
-              Teachers
-            </Link>
-            <Link
-              to="/admin/checklist-audit"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
-            >
-              <AlertTriangle className="w-5 h-5" />
+        </header>
+
+        <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard label="Total Teachers" value={String(totalTeachers)} icon={Users} tone="indigo" />
+          <StatCard label="Total Classes" value={String(totalClasses)} icon={School} tone="green" />
+          <StatCard label="Class Teachers" value={String(classTeachers)} icon={Users} tone="amber" />
+          <StatCard label="Need Assignment" value={String(unassignedClasses)} icon={AlertTriangle} tone="red" />
+        </section>
+
+        {unassignedClasses > 0 && (
+          <section className="mb-5 rounded-2xl border border-[#F8D7A7] bg-[#FFF7E9] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[14px] font-semibold text-[#B45309]">Missing Class Teacher Assignments</p>
+                <p className="text-[13px] text-[#8A5A15]">
+                  {unassignedClasses} {unassignedClasses === 1 ? 'class is' : 'classes are'} not assigned to a class teacher.
+                </p>
+              </div>
+              <Link
+                to="/admin/teachers"
+                className="inline-flex h-10 items-center justify-center rounded-xl border border-[#EAB865] bg-white px-4 text-[13px] font-semibold text-[#B45309]"
+              >
+                Resolve Now
+              </Link>
+            </div>
+          </section>
+        )}
+
+        <section className="rounded-3xl bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[18px] font-semibold">Recent Activity</h2>
+            <Link to="/admin/checklist-audit" className="text-[13px] font-semibold text-[#4F46E5]">
               Checklist Audit
             </Link>
-          </nav>
-        </aside>
+          </div>
 
-        {/* Main Content */}
-        <main className="flex-1">
-          <header className="border-b border-border px-6 py-4 flex justify-between items-center bg-card">
-            <div>
-              <h2 className="text-xl font-semibold text-foreground">Dashboard</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">Overview of school management</p>
-            </div>
-            <Button
-              onClick={() => setShowKeywordSettings(true)}
-              variant="outline"
-              size="sm"
-              className="border-border text-foreground hover:bg-secondary"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Subject Keywords
-            </Button>
-          </header>
-
-          <div className="p-6 space-y-6">
-            {/* Stats */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-secondary rounded-xl border border-border p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Users className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-semibold text-foreground">{totalTeachers}</p>
-                    <p className="text-sm text-muted-foreground">Total Teachers</p>
-                  </div>
-                </div>
+          <div className="space-y-2">
+            {recentHistory.length === 0 && (
+              <div className="rounded-2xl border border-[#E3E7EE] bg-[#F8FAFC] p-4 text-[13px] text-[#677489]">
+                No recent activity found.
               </div>
-
-              <div className="bg-secondary rounded-xl border border-border p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
-                    <School className="w-6 h-6 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-semibold text-foreground">{totalClasses}</p>
-                    <p className="text-sm text-muted-foreground">Total Classes</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-secondary rounded-xl border border-border p-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center">
-                    <Users className="w-6 h-6 text-yellow-500" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-semibold text-foreground">{classTeachers}</p>
-                    <p className="text-sm text-muted-foreground">Class Teachers</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Alerts */}
-            {unassignedClasses > 0 && (
-              <section>
-                <h3 className="font-semibold mb-3 text-foreground">Alerts</h3>
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="font-medium text-yellow-600 dark:text-yellow-500">Missing Class Teachers</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {unassignedClasses} {unassignedClasses === 1 ? 'class has' : 'classes have'} no assigned class teacher
-                      </p>
-                    </div>
-                    <Link to="/admin/teachers">
-                      <Button size="sm" variant="outline" className="border-yellow-500/20 hover:bg-yellow-500/10">
-                        Assign
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </section>
             )}
 
-            {/* Recent Activity */}
-            <section>
-              <h3 className="font-semibold mb-3 text-foreground">Recent Activity</h3>
-              <div className="bg-card rounded-xl border border-border divide-y divide-border">
-                {recentHistory.length === 0 && (
-                  <div className="p-4 text-sm text-muted-foreground">No recent activity found.</div>
-                )}
-
-                {recentHistory.map(entry => (
-                  <div key={entry.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-foreground">{entry.teacherName || 'Teacher'}</p>
-                        <p className="text-sm text-muted-foreground">Updated items for Class {entry.class}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{entry.date}</p>
-                    </div>
+            {recentHistory.map(entry => (
+              <div key={entry.id} className="rounded-2xl border border-[#E3E7EE] bg-[#F8FAFC] p-4">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[14px] font-semibold text-[#2F3B52]">{entry.teacherName || 'Teacher'}</p>
+                    <p className="text-[13px] text-[#677489]">Updated checklist for Class {entry.class}</p>
                   </div>
-                ))}
+                  <p className="text-[12px] text-[#677489]">{entry.date}</p>
+                </div>
               </div>
-            </section>
+            ))}
           </div>
-        </main>
+        </section>
       </div>
 
-      {/* Keyword Settings Dialog */}
       <Dialog open={showKeywordSettings} onOpenChange={setShowKeywordSettings}>
-        <DialogContent className="max-w-2xl bg-card border-border text-foreground">
+        <DialogContent className="max-w-2xl border-[#E3E7EE] bg-white text-[#1E2A44]">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Subject Keyword Configuration</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Configure keywords for each subject to prevent cross-subject teacher updates
+            <DialogTitle>Subject Keyword Configuration</DialogTitle>
+            <DialogDescription className="text-[#677489]">
+              Configure subject keywords to avoid cross-subject checklist updates.
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-96 overflow-y-auto">
@@ -192,6 +135,35 @@ export function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  tone: 'indigo' | 'green' | 'amber' | 'red';
+}) {
+  const tones = {
+    indigo: 'bg-[#E9ECFF] text-[#4F46E5]',
+    green: 'bg-[#EAF8F0] text-[#15803D]',
+    amber: 'bg-[#FFF7E9] text-[#B45309]',
+    red: 'bg-[#FDEEEE] text-[#DC2626]',
+  } as const;
+
+  return (
+    <div className="rounded-2xl bg-white p-4 shadow-[0_6px_18px_rgba(15,23,42,0.06)]">
+      <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${tones[tone]}`}>
+        <Icon className="h-5 w-5" />
+      </span>
+      <p className="mt-2 text-[24px] font-semibold">{value}</p>
+      <p className="text-[13px] text-[#677489]">{label}</p>
     </div>
   );
 }
