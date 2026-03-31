@@ -1,9 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button } from '../ui/button';
-import { ArrowLeft, Plus, X } from 'lucide-react';
 import { Link } from 'react-router';
-import { useAuth } from '../../context/AuthContext';
+import {
+  ArrowLeft,
+  Ban,
+  BookOpen,
+  BookText,
+  Calculator,
+  Check,
+  CircleMinus,
+  Compass,
+  GraduationCap,
+  Info,
+  Lock,
+  NotebookPen,
+  PencilRuler,
+  Plus,
+  Proportions,
+  Send,
+  X,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/AuthContext';
 import { getClasses, getQuickSuggestions, submitTeacherUpdates } from '../../services/firestoreService';
 
 interface Item {
@@ -15,15 +32,15 @@ interface Item {
 
 export function UpdateItems() {
   const { user } = useAuth();
+
   const [classes, setClasses] = useState<string[]>([]);
   const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [action, setAction] = useState<'bring' | 'do-not-bring'>('bring');
-  const [scope, setScope] = useState<'subject' | 'general'>('subject');
   const [items, setItems] = useState<Item[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
   const teacherSubject = (user?.subject ?? '').trim();
-  const isClassTeacher = Boolean(user?.isClassTeacher);
 
   const availableClasses = useMemo(() => {
     const assigned = user?.assignedClasses ?? [];
@@ -46,6 +63,11 @@ export function UpdateItems() {
     loadClasses();
   }, [user?.assignedClasses]);
 
+  const quickSuggestions = useMemo(
+    () => getQuickSuggestions({ subject: teacherSubject, scope: teacherSubject ? 'subject' : 'general' }),
+    [teacherSubject],
+  );
+
   const toggleClassSelection = (className: string) => {
     setSelectedClasses(prev =>
       prev.includes(className)
@@ -54,35 +76,69 @@ export function UpdateItems() {
     );
   };
 
-  const addItem = (name: string) => {
-    if (!name.trim()) return;
+  const normalizeName = (name: string) => name.trim().toLowerCase();
 
-    const itemSubject = scope === 'subject' ? teacherSubject || undefined : undefined;
-    
-    const newItem: Item = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      type: action,
-      subject: itemSubject,
-    };
-    
-    setItems(prev => [...prev, newItem]);
+  const setItemType = (name: string, type: Item['type']) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+
+    const itemSubject = teacherSubject || undefined;
+
+    setItems(prev => {
+      const sameIndex = prev.findIndex(
+        item =>
+          normalizeName(item.name) === normalizeName(trimmed) &&
+          (item.subject ?? '') === (itemSubject ?? ''),
+      );
+
+      if (sameIndex >= 0) {
+        const cloned = [...prev];
+        cloned[sameIndex] = {
+          ...cloned[sameIndex],
+          type,
+        };
+        return cloned;
+      }
+
+      return [
+        ...prev,
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: trimmed,
+          type,
+          subject: itemSubject,
+        },
+      ];
+    });
+
     setInputValue('');
+  };
+
+  const addFromCurrentAction = (name: string) => {
+    setItemType(name, action);
   };
 
   const removeItem = (id: string) => {
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
+  const bringItems = items.filter(item => item.type === 'bring');
+  const doNotBringItems = items.filter(item => item.type === 'do-not-bring');
+
+  const suggestionUsed = (name: string) =>
+    items.some(item => normalizeName(item.name) === normalizeName(name));
+
   const handleSubmit = async () => {
     if (items.length === 0) {
       toast.error('Please add at least one item');
       return;
     }
+
     if (selectedClasses.length === 0) {
       toast.error('Please select at least one class');
       return;
     }
+
     if (!user) {
       toast.error('You must be logged in');
       return;
@@ -91,23 +147,23 @@ export function UpdateItems() {
     setIsSaving(true);
 
     try {
+      const roleType: 'class-teacher' | 'subject-teacher' = teacherSubject ? 'subject-teacher' : 'class-teacher';
+
       await submitTeacherUpdates({
         classNames: selectedClasses,
         items,
         teacherId: user.id,
         teacherName: user.name,
-        teacherRoleType: scope === 'general' ? 'class-teacher' : 'subject-teacher',
+        teacherRoleType: roleType,
         teacherSubject: teacherSubject || undefined,
       });
 
-      const bringCount = items.filter(i => i.type === 'bring').length;
-      const doNotBringCount = items.filter(i => i.type === 'do-not-bring').length;
-
-      toast.success('Update sent successfully!', {
-        description: `${selectedClasses.length} class(es) updated • ${bringCount} bring • ${doNotBringCount} do not bring`,
+      toast.success('Update sent successfully', {
+        description: `${selectedClasses.length} class(es) updated`,
       });
 
       setItems([]);
+      setInputValue('');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to save items to database';
       toast.error(message);
@@ -116,209 +172,308 @@ export function UpdateItems() {
     }
   };
 
-  const bringItems = items.filter(i => i.type === 'bring');
-  const doNotBringItems = items.filter(i => i.type === 'do-not-bring');
-  const quickSuggestions = useMemo(
-    () => getQuickSuggestions({ subject: teacherSubject, scope }),
-    [teacherSubject, scope],
-  );
+  const quickIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes('textbook')) return BookText;
+    if (n.includes('notebook')) return NotebookPen;
+    if (n.includes('calculator')) return Calculator;
+    if (n.includes('ruler')) return PencilRuler;
+    if (n.includes('compass')) return Compass;
+    if (n.includes('protractor')) return Proportions;
+    return BookOpen;
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24">
-      <header className="sticky top-0 z-10 bg-card/80 backdrop-blur-sm border-b border-border px-4 py-4">
-        <div className="max-w-md mx-auto flex items-center gap-3">
-          <Link to="/teacher">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+    <div className="min-h-screen bg-[#F3F5F9] text-[#1E2A44]" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mx-auto w-full max-w-md px-4 pt-4 pb-28">
+        <header className="mb-4 flex items-center gap-3">
+          <Link
+            to="/teacher"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-[#D9DEE8] bg-white shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+            aria-label="Back"
+          >
+            <ArrowLeft className="h-5 w-5" />
           </Link>
-          <h1 className="font-semibold">Update Packing Items</h1>
-        </div>
-      </header>
 
-      <main className="max-w-md mx-auto px-4 py-6 space-y-6 pb-40">
-        {/* Class Selection */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Select Class(es)</h3>
-          <div className="flex flex-wrap gap-2">
-            {availableClasses.map(cls => (
-              <button
-                key={cls}
-                onClick={() => toggleClassSelection(cls)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedClasses.includes(cls)
-                    ? 'bg-indigo-500 text-foreground'
-                    : 'bg-muted text-muted-foreground border border-border hover:border-border/80'
-                }`}
-              >
-                {cls}
-              </button>
-            ))}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[20px] font-semibold leading-7 text-[#1E2A44]">Update Packing Items</h1>
+            <p className="text-[13px] leading-5 text-[#677489]">Send instructions for students today.</p>
           </div>
-        </section>
+
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-white shadow-[0_10px_18px_rgba(79,70,229,0.35)]">
+            <Lock className="h-5 w-5" />
+          </div>
+        </header>
 
         {teacherSubject && (
-          <section>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Instruction Type</h3>
-            <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg">
-              <button
-                onClick={() => setScope('subject')}
-                className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  scope === 'subject'
-                    ? 'bg-indigo-500 text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                }`}
-              >
-                Subject ({teacherSubject})
-              </button>
-              <button
-                onClick={() => setScope('general')}
-                disabled={!isClassTeacher}
-                className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  scope === 'general'
-                    ? 'bg-indigo-500 text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                } disabled:opacity-40 disabled:cursor-not-allowed`}
-              >
-                General
-              </button>
+          <section className="mb-4 rounded-2xl bg-[#EEF0F7] p-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DDE2FF] text-[#4F46E5]">
+                  <BookOpen className="h-5 w-5" />
+                </span>
+                <p className="text-[16px] font-semibold text-[#1E2A44]">Subject: {teacherSubject}</p>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#E6E8FF] px-2.5 py-1 text-[12px] font-medium text-[#6366F1]">
+                <Info className="h-3.5 w-3.5" />
+                Auto-selected
+              </span>
             </div>
-            {!isClassTeacher && (
-              <p className="text-xs text-muted-foreground/70 mt-2">Only class teachers can send general instructions.</p>
-            )}
           </section>
         )}
 
-        {/* Action Toggle */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Action</h3>
-          <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg">
-            <button
-              onClick={() => setAction('bring')}
-              className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
-                action === 'bring'
-                  ? 'bg-green-500 text-foreground'
-                  : 'text-muted-foreground hover:text-foreground/80'
-              }`}
-            >
-              Bring
-            </button>
-            <button
-              onClick={() => setAction('do-not-bring')}
-              className={`py-2.5 rounded-md text-sm font-medium transition-colors ${
-                action === 'do-not-bring'
-                  ? 'bg-red-500 text-foreground'
-                  : 'text-muted-foreground hover:text-foreground/80'
-              }`}
-            >
-              Do NOT Bring
-            </button>
+        <section className="mb-4 rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DDE2FF] text-[#5B5FF2]">
+                <GraduationCap className="h-5 w-5" />
+              </span>
+              <h2 className="text-[17px] font-semibold text-[#1E2A44]">Classes</h2>
+            </div>
+            <span className="rounded-full bg-[#E9ECFF] px-3 py-1 text-[13px] font-semibold text-[#4F46E5]">
+              {selectedClasses.length} selected {selectedClasses.length > 0 ? '✓' : ''}
+            </span>
           </div>
-        </section>
 
-        {/* Quick Suggestions */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Quick Add</h3>
           <div className="flex flex-wrap gap-2">
-            {quickSuggestions.map(suggestion => (
-              <button
-                key={suggestion}
-                onClick={() => addItem(suggestion)}
-                className="px-3 py-1.5 bg-muted border border-border hover:border-indigo-500/50 rounded-full text-sm text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-              >
-                {suggestion}
-              </button>
-            ))}
+            {availableClasses.map(cls => {
+              const selected = selectedClasses.includes(cls);
+              return (
+                <button
+                  key={cls}
+                  type="button"
+                  onClick={() => toggleClassSelection(cls)}
+                  className={`inline-flex h-11 items-center gap-1.5 rounded-full border px-4 text-[14px] font-medium transition-colors ${
+                    selected
+                      ? 'border-transparent bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-white shadow-[0_8px_16px_rgba(79,70,229,0.3)]'
+                      : 'border-[#C8CEDB] bg-white text-[#303C53]'
+                  }`}
+                >
+                  {selected && <Check className="h-4 w-4" />}
+                  {cls}
+                </button>
+              );
+            })}
           </div>
         </section>
 
-        {/* Custom Input */}
-        <section>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Add Custom Item</h3>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && addItem(inputValue)}
-              placeholder="Type item name..."
-              className="flex-1 px-4 py-3 bg-muted border border-border rounded-lg outline-none focus:border-indigo-500 transition-colors text-foreground"
-            />
-            <Button
-              onClick={() => addItem(inputValue)}
-              size="icon"
-              className="bg-indigo-500 hover:bg-indigo-600 h-auto aspect-square"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-          </div>
-        </section>
-
-        {/* Live Preview */}
-        {items.length > 0 && (
-          <section>
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Preview</h3>
-            <div className="space-y-4">
-              {bringItems.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground/70 mb-2">TO BRING ({bringItems.length})</p>
-                  <div className="space-y-2">
-                    {bringItems.map(item => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20"
-                      >
-                        <span className="text-sm text-green-400">{item.name}</span>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-green-400/60 hover:text-green-400"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {doNotBringItems.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground/70 mb-2">DO NOT BRING ({doNotBringItems.length})</p>
-                  <div className="space-y-2">
-                    {doNotBringItems.map(item => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20"
-                      >
-                        <span className="text-sm text-red-400">{item.name}</span>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-400/60 hover:text-red-400"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+        <section className="mb-4 rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <div className="mb-3 flex items-center gap-2.5">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DDF6E8] text-[#16A34A]">
+              <Check className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-[17px] font-semibold text-[#1E2A44]">Instruction</h2>
+              <p className="text-[13px] text-[#677489]">What should students do?</p>
             </div>
-          </section>
-        )}
-      </main>
+          </div>
 
-      {/* Sticky Submit Button */}
-      <div className="fixed bottom-16 left-0 right-0 z-20 p-4 bg-gradient-to-t from-background via-background to-transparent">
-        <div className="max-w-md mx-auto">
-          <Button
-            onClick={handleSubmit}
-            disabled={items.length === 0 || isSaving || selectedClasses.length === 0}
-            className="w-full bg-indigo-500 hover:bg-indigo-600 h-12 text-base font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSaving
-              ? 'Sending Update...'
-              : `Send Update (${selectedClasses.length} class${selectedClasses.length === 1 ? '' : 'es'})`}
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setAction('bring')}
+              className={`h-12 rounded-2xl border px-4 text-[15px] font-semibold transition-colors ${
+                action === 'bring'
+                  ? 'border-transparent bg-[#16A34A] text-white'
+                  : 'border-[#C8CEDB] bg-white text-[#303C53]'
+              }`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Check className="h-4.5 w-4.5" />
+                Bring
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setAction('do-not-bring')}
+              className={`h-12 rounded-2xl border px-4 text-[15px] font-semibold transition-colors ${
+                action === 'do-not-bring'
+                  ? 'border-[#EF4444] bg-[#FDECEC] text-[#DC2626]'
+                  : 'border-[#EF4444] bg-white text-[#DC2626]'
+              }`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Ban className="h-4.5 w-4.5" />
+                Don't bring
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <section className="rounded-3xl bg-white p-4 shadow-[0_6px_20px_rgba(15,23,42,0.07)]">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#DDE2FF] text-[#5B5FF2]">
+                <Lock className="h-5 w-5" />
+              </span>
+              <div>
+                <h2 className="text-[17px] font-semibold text-[#1E2A44]">Items</h2>
+                <p className="text-[13px] text-[#677489]">Choose what to bring or not to bring</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-[#E9ECFF] px-3 py-1 text-[13px] font-semibold text-[#4F46E5]">
+              {items.length} items selected
+            </span>
+          </div>
+
+          <div className="mb-3 flex flex-wrap gap-2">
+            {quickSuggestions.map(suggestion => {
+              const selected = suggestionUsed(suggestion);
+              return (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => addFromCurrentAction(suggestion)}
+                  className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                    selected
+                      ? 'border-[#B8C0D0] bg-[#F3F5FA] text-[#4A556A]'
+                      : 'border-[#C8CEDB] bg-white text-[#4A556A]'
+                  }`}
+                >
+                  {suggestion}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-[#BFE7CF] bg-[#EAF8F0] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[13px] font-bold text-[#15803D]">BRING ITEMS</p>
+                <span className="text-[12px] font-semibold text-[#15803D]">{bringItems.length} items</span>
+              </div>
+
+              <div className="space-y-2">
+                {bringItems.map(item => {
+                  const Icon = quickIcon(item.name);
+                  return (
+                    <div key={item.id} className="flex items-center justify-between rounded-xl bg-white/80 px-2.5 py-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#DDF6E8] text-[#16A34A]">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="truncate text-[14px] font-medium text-[#1E2A44]">{item.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setItemType(item.name, 'do-not-bring')}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#16A34A] text-white"
+                        aria-label={`Move ${item.name} to don't bring`}
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#F4C4C4] bg-[#FDEEEE] p-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[13px] font-bold text-[#DC2626]">DON'T BRING ITEMS</p>
+                <span className="text-[12px] font-semibold text-[#DC2626]">{doNotBringItems.length} items</span>
+              </div>
+
+              <div className="space-y-2">
+                {doNotBringItems.map(item => {
+                  const Icon = quickIcon(item.name);
+                  return (
+                    <div key={item.id} className="flex items-center justify-between rounded-xl bg-white/80 px-2.5 py-2">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#FBD4D4] text-[#DC2626]">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="truncate text-[14px] font-medium text-[#1E2A44]">{item.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setItemType(item.name, 'bring')}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[#EF4444] text-white"
+                        aria-label={`Move ${item.name} to bring`}
+                      >
+                        <CircleMinus className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {items.length > 0 && (
+            <>
+              <div className="my-4 h-px bg-[#E3E7EE]" />
+
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-[16px] font-semibold text-[#1E2A44]">Selected Summary</h3>
+                <span className="text-[13px] font-semibold text-[#677489]">{items.length} items total</span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {items.map(item => {
+                  const chipClass = item.type === 'bring'
+                    ? 'border-[#BFE7CF] bg-[#EAF8F0] text-[#15803D]'
+                    : 'border-[#F4C4C4] bg-[#FDEEEE] text-[#DC2626]';
+
+                  return (
+                    <span
+                      key={item.id}
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[14px] font-medium ${chipClass}`}
+                    >
+                      {item.name}
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        className="inline-flex h-5 w-5 items-center justify-center rounded-full"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          <div className="mt-4">
+            <p className="mb-2 text-[16px] font-semibold text-[#1E2A44]">Add Custom Item</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={inputValue}
+                onChange={event => setInputValue(event.target.value)}
+                onKeyDown={event => event.key === 'Enter' && addFromCurrentAction(inputValue)}
+                placeholder="Enter item name..."
+                className="h-12 flex-1 rounded-xl border border-[#C8CEDB] bg-white px-3.5 text-[14px] text-[#1E2A44] outline-none placeholder:text-[#8A94A8] focus:border-[#6366F1]"
+              />
+              <button
+                type="button"
+                onClick={() => addFromCurrentAction(inputValue)}
+                className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-white"
+                aria-label="Add custom item"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div className="fixed bottom-16 left-0 right-0 z-20 px-4 pb-3">
+          <div className="mx-auto w-full max-w-md">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={items.length === 0 || isSaving || selectedClasses.length === 0}
+              className="inline-flex h-14 w-full items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#4F46E5,#5B5FF2)] text-[16px] font-semibold text-white shadow-[0_12px_24px_rgba(79,70,229,0.32)] disabled:opacity-50 disabled:shadow-none"
+            >
+              <Send className="mr-2 h-4.5 w-4.5" />
+              {isSaving
+                ? 'Sending...'
+                : `Send Update to ${selectedClasses[0] ?? 'Class'}${selectedClasses.length > 1 ? ` +${selectedClasses.length - 1}` : ''}`}
+            </button>
+          </div>
         </div>
       </div>
     </div>
